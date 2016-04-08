@@ -129,7 +129,9 @@ public:
 
             else
             {
-                v = lua_tostring( state, 0 );
+                v = lua_tostring( state, index );
+				v = strdcpy( v, 0, strlen( v ) );
+
                 lua_pop( state, 1 );
 
                 return true;

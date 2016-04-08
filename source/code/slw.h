@@ -21,6 +21,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <exception>
+
 #include <lua.hpp>
 
 #ifndef __log_msg
@@ -325,16 +327,20 @@ public:
         const char*
         call( const unsigned int nresults )
         {
-			int type = 0;
+            try
+			{
+				if ( lua_pcall( state.state, args, nresults, 0 ) )
+				{
+		            const char* error = lua_tostring( state.state, 0 );
+			        lua_pop( state.state, 1 );
 
-            if ( type = lua_pcall( &state, args, nresults, 0 ) )
-            {
-				const bool syntax = type == LUA_ERRSYNTAX;
-                const char* error = lua_tostring( &state, 0 );
-                lua_pop( &state, 1 );
-
-                return error? error: "";
-            }
+	                return error? error: "";
+		        }
+			}
+			catch ( std::exception* e )
+			{
+				( void )e;
+			}
 
             return "";
         }

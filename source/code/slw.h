@@ -79,11 +79,17 @@ public:
             luaL_openlibs( state );
         }
 
-        State( lua_State& state )
-            : state( &state )
-        {
+		State( State& _state )
+			: state( NULL )
+		{
+			state = _state.state;
+		}
 
-        }
+		State( lua_State* _state )
+			: state( _state )
+		{
+
+		}
 
         ~State( void )
         {
@@ -319,17 +325,7 @@ public:
     private:
 
 		static int
-		handler( lua_State* state )
-		{
-			Lua::State::EntryPoint* point = NULL;
-
-			point = 
-				( Lua::State::EntryPoint* ) 
-				( unsigned int )
-				( lua_tonumber( state, lua_upvalueindex( 1 ) ) );
-
-			return ( *point->entry )( *point->state, point->user );
-		}
+		handler( lua_State* state );
 
 		struct EntryPoint
 		{
@@ -444,15 +440,15 @@ public:
 
         Call( State& _state, const char* fn )
             : args( 0 )
-            , state( *_state.state )
+            , state( _state )
         {
-			get_field( &state, fn );
+			get_field( state.state, fn );
         }
 
         Call&
         param( const unsigned int v )
         {
-            lua_pushnumber( &state, v );
+            lua_pushnumber( state.state, v );
             ++args;
 
             return *this;
@@ -461,7 +457,7 @@ public:
         Call&
         param( const double v )
         {
-            lua_pushnumber( &state, v );
+            lua_pushnumber( state.state, v );
             ++args;
 
             return *this;
@@ -470,7 +466,7 @@ public:
         Call&
         param( const char* v )
         {
-            lua_pushstring( &state, v );
+            lua_pushstring( state.state, v );
             ++args;
 
             return *this;
@@ -498,8 +494,10 @@ public:
         }
 
     private:
+		const Call& operator=( const Call& );
+
         unsigned int args;
-        lua_State& state;
+        Lua::State& state;
     };
 }
 

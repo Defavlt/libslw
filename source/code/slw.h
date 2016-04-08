@@ -175,6 +175,147 @@ public:
             }
         }
 
+		template< typename VecT, unsigned int length >
+		const bool
+		pop( VecT& v, int offset = 0 )
+		{
+			int _top	= lua_gettop( state );
+
+			bool success = true;
+
+			int state_i = _top + offset;
+			int vec_i	= length;
+
+			for ( ; success 
+				&& _top > 0 
+				&& ( success = lua_isnumber( state, state_i ) );
+				--vec_i, --state_i )
+			{
+				v[ i ] = ( float )lua_tonumber( state, state_i );
+				lua_pop( state, state_i );
+			}
+
+			return success;
+		}
+
+		const bool
+		peek( const char*& v, int offset = 0 )
+		{
+			const int index = top() + offset;
+			const int _top	= lua_gettop( state );
+
+			if ( _top == 0 || !lua_isstring( state, index ) )
+				return false;
+
+			else
+			{
+				v = lua_tostring( state, index );
+				v = strdcpy( v, 0, strlen( v ) );
+
+				return true;
+			}
+		}
+
+		const bool
+		peek( bool& v, int offset = 0 )
+		{
+			const int index = top() + offset;
+			const int _top	= lua_gettop( state );
+
+			if ( _top == 0 || !lua_isboolean( state, index ) )
+				return false;
+
+			else
+			{
+				v = lua_toboolean( state, index );
+
+				return true;
+			}
+		}
+
+		template< typename NumT >
+		const bool
+		peek( NumT& v, int offset = 0 )
+		{
+			const int index = top() + offset;
+			const int _top	= lua_gettop( state );
+
+			if ( _top == 0 || !lua_isnumber( state, index ) )
+				return false;
+
+			else
+			{
+				v = ( NumT )lua_tonumber( state, index );
+
+				return true;
+			}
+		}
+
+		template< typename VecT, unsigned int length >
+		const bool
+		peek( VecT& v, int offset = 0 )
+		{
+			int _top	= lua_gettop( state );
+
+			bool success = true;
+
+			int state_i = -1;
+			int vec_i	= length - 1;
+
+			for ( ; success 
+				&& _top > 0 
+				&& state_i > -_top 
+				&& ( success = success && lua_isnumber( state, state_i ) );
+			
+				--vec_i, --state_i )
+				{
+					v[ vec_i ] = ( float )lua_tonumber( state, state_i );
+				}
+
+			return success;
+		}
+
+		void
+		push( const char* v )
+		{
+			lua_pushstring( state, v );
+		}
+
+		void
+		push( const bool v )
+		{
+			lua_pushboolean( state, v );
+		}
+
+		template< typename NumT >
+		void
+		push( const NumT v )
+		{
+			lua_pushnumber( state, v );
+		}
+
+		template< typename VecT, unsigned int length >
+		void
+		push( const VecT v )
+		{
+			for ( unsigned int i = 0; i < length; ++i )
+				lua_pushnumber( state, v[ i ] );
+		}
+
+		int
+		size( void )
+		{
+			return lua_gettop( state );
+		}
+
+	protected:
+
+		virtual int
+		top( void )
+		{
+			return -1;
+		}
+
     private:
 
 		static int

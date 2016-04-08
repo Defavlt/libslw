@@ -36,7 +36,7 @@
 #endif
 
 #define __LUA_ENTRY_OUT int
-#define __LUA_ENTRY_SIG ( Lua::State& state, void* user )
+#define __LUA_ENTRY_IN ( Lua::State& state, void* user )
 
 /** \brief Dynamic string copy
  * Copies `length` characters from `src`, starting at `start`.
@@ -64,7 +64,7 @@ namespace Lua
 {
 	class State;
 
-	typedef __LUA_ENTRY_OUT (*Entry) __LUA_ENTRY_SIG;
+	typedef __LUA_ENTRY_OUT (*Entry) __LUA_ENTRY_IN;
 
     class State
     {

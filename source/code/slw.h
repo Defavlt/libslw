@@ -98,7 +98,7 @@ public:
             else
                 luaL_loadstring( state, str );
 
-            return lua_pcall( state, 0, 0, 0 );
+            return lua_pcall( state, 0, LUA_MULTRET, 0 );
         }
 
 		void

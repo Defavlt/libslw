@@ -119,9 +119,12 @@ public:
 		}
 
         const bool
-        pop( const char*& v )
+        pop( const char*& v, int offset = 0 )
         {
-            if ( !lua_isstring( state, 0 ) )
+			const int index = top() + offset;
+			const int _top	= lua_gettop( state );
+
+            if ( _top == 0 || !lua_isstring( state, index ) )
                 return false;
 
             else
@@ -134,9 +137,12 @@ public:
         }
 
         const bool
-        pop( bool& v )
+        pop( bool& v, int offset = 0 )
         {
-            if ( !lua_isboolean( state, 0 ) )
+			const int index = top() + offset;
+			const int _top	= lua_gettop( state );
+
+            if ( _top == 0 || !lua_isboolean( state, index ) )
                 return false;
 
             else
@@ -150,9 +156,12 @@ public:
 
         template< typename NumT >
         const bool
-        pop( NumT& v )
-        {
-            if ( !lua_isnumber( state, 0 ) )
+        pop( NumT& v, int offset = 0 )
+		{
+			const int index = top() + offset;
+			const int _top	= lua_gettop( state );
+
+            if ( _top == 0 || !lua_isnumber( state, index ) )
                 return false;
 
             else

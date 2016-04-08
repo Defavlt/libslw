@@ -149,7 +149,7 @@ public:
 
             else
             {
-                v = lua_toboolean( state, 0 );
+                v = lua_toboolean( state, index );
                 lua_pop( state, 1 );
 
                 return true;
@@ -168,7 +168,7 @@ public:
 
             else
             {
-                v = ( NumT )lua_tonumber( state, 0 );
+                v = ( NumT )lua_tonumber( state, index );
                 lua_pop( state, 1 );
 
                 return true;

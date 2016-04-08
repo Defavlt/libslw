@@ -113,7 +113,7 @@ public:
 			point->state = this;
 			point->user	 = user;
 
-			lua_pushnumber( state, ( unsigned int )( point ) );
+			lua_pushnumber( state, ( size_t )( point ) );
 			lua_pushcclosure( state, &handler, 1 );
 			lua_setglobal( state, event );
 		}

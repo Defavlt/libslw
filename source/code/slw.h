@@ -172,6 +172,7 @@ namespace Lua
     {
 public:
         friend class Call;
+		friend class Table;
 
         State( void )
             : state( lua_open() )
@@ -440,6 +441,143 @@ public:
 		static int handlers;
     };
 
+	/* \brief Create or modify a table
+	 *
+	 **/
+	class Table
+	{
+	public:
+
+		Table( Lua::State& state, const int index = -1 )
+			: index( index )
+			, state( state )
+		{
+			bool table = lua_istable( state.state, index );
+		}
+
+		/* \brief allocate space for and create a new table
+		 * \param narr number of array elements
+		 * \param nrec number of non-array elements
+		 *
+		 **/
+		Table&
+		Allocate( const int narr, const int nrec )
+		{
+			lua_createtable( state.state, narr, nrec );
+
+			return *this;
+		}
+
+		Table&
+		Find( const char* field, bool& result )
+		{
+			Lua::get_field( state.state, field );
+
+			result = lua_istable( state.state, -1 );
+
+			/* stack:
+			 *   1 table
+			 */
+		}
+
+		/* \brief Set table element this[field] = v
+		 *
+		 **/
+		Table&
+		Set( const char* field, const char* v )
+		{
+			state.push( v );
+			lua_setfield( state.state, -1, field );
+
+			return *this;
+		}
+
+		Table&
+		Set( const char* field, bool v )
+		{
+			state.push( v );
+			lua_setfield( state.state, -1, field );
+
+			return *this;
+		}
+
+		template< typename NumT >
+		Table&
+		Set( const char* field, NumT v )
+		{
+			state.push( v );
+			lua_setfield( state.state, -1, field );
+
+			return *this;
+		}
+
+		/* \brief Get table element this[field]
+		 * \note Reuse the `result´ in subsequent calls
+		 *     for a neat abort on error effect
+		 * \note remember to free v if it's a string
+		 **/
+		Table&
+		Get( const char* field, const char*& v, bool& result )
+		{
+			if ( result )
+			{
+				lua_getfield( state.state, -1, field );
+
+				result = state.pop( v );
+			}
+
+			return *this;
+		}
+
+		Table&
+		Get( const char* field, bool& v, bool& result )
+		{
+			if ( result )
+			{
+				lua_getfield( state.state, -1, field );
+
+				result = state.pop( v );
+			}
+
+			return *this;
+		}
+
+		template< typename NumT >
+		Table&
+		Get( const char* field, NumT& v, bool& result )
+		{
+			if ( result )
+			{
+				lua_getfield( state.state, -1, field );
+
+				result = state.pop( v );
+			}
+
+			return *this;
+		}
+
+		template< typename VecT, unsigned int length >
+		Table&
+		Get( const char* field, VecT& v, bool& result )
+		{
+			if ( result )
+			{
+				lua_getfield( state.state, -1, field );
+
+				result = state.peek< VecT, length >( v );
+			}
+
+			return *this;
+		}
+
+	private:
+		const Table& operator=( const Table& );
+
+		const int index;
+
+		Lua::State& state;
+	};
+
     class Call
     {
     public:
@@ -542,7 +680,7 @@ public:
             : args( 0 )
             , state( _state )
         {
-			get_field( state.state, fn );
+			Lua::get_field( state.state, fn );
         }
 
         Call&
@@ -602,5 +740,3 @@ public:
 }
 
 #endif // __LUA_H_INCLUDED__
-
-#define call_prepare( state ) ( call_prepare_r* )( call_prepare_r( state ) )

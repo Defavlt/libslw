@@ -318,7 +318,7 @@ public:
 				&& ( success = lua_isnumber( state, state_i ) );
 				--vec_i, --state_i, _top = lua_gettop( state ) )
 			{
-				v[ i ] = ( float )lua_tonumber( state, state_i );
+				v[ vec_i ] = ( float )lua_tonumber( state, state_i );
 				lua_pop( state, state_i );
 			}
 
@@ -603,7 +603,19 @@ public:
 			{
 				lua_getfield( state.state, -1, field );
 
-				result = state.peek< VecT, length >( v );
+				int type = lua_type( state.state, -1 );
+
+				if ( result = ( type == LUA_TTABLE ) )
+				{
+					lua_pushnil( state.state );
+
+					int i = 0;
+
+					for ( ; i < length && result && lua_next( state.state, -2 ); ++i )
+					{
+						state.pop( v[ i ] );
+					}
+				}
 			}
 
 			return *this;

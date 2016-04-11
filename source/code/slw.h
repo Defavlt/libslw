@@ -40,13 +40,15 @@
 #define __LUA_ENTRY_OUT int
 #define __LUA_ENTRY_IN ( Lua::State& state, void* user )
 
-/** \brief Dynamic string copy
- * Copies `length` characters from `src`, starting at `start`.
+#define __LUA_ENTRY( NAME ) __LUA_ENTRY_OUT NAME __LUA_ENTRY_IN
+
+/* \brief Dynamic string copy
+ *     Copies `length` characters from `src`, starting at `start`.
  * \param src the source string
  * \param start the starting index
  * \param lenght the length of the sub string
  * \return a pointer to the sub string
- * \note Shit in, shit out. `Start + length` must be < strlen(src)
+ * \note `Start + length < strlen(src)´ required
  * \note Remember to `free` your substring when done
  */
 static inline char*
@@ -444,6 +446,8 @@ public:
 				lua_pushnumber( state, v[ i ] );
 		}
 
+		/* \brief the current size of the stack
+		 **/
 		int
 		size( void )
 		{

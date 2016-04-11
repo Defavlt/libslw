@@ -198,7 +198,7 @@ public:
             state = NULL;
         }
 
-        const bool
+        bool
         load( const char* str, const bool str_is_file = true )
         {
             if ( str_is_file )
@@ -229,8 +229,15 @@ public:
 			lua_pushcclosure( state, &handler, 1 );
 			lua_setglobal( state, event );
 		}
-
-        const bool
+		
+		/* \brief Pop a value from the stack, optionally at an offset 
+		 * \return true if the stack isn't empty and there's an actual
+		 *     value
+		 *     
+		 * \param v the pop'd value
+		 * \note remember to free the value if it's a string
+		 */
+		bool
         pop( const char*& v, int offset = 0 )
         {
 			const int index = top() + offset;
@@ -250,7 +257,7 @@ public:
             }
         }
 
-        const bool
+        bool
         pop( bool& v, int offset = 0 )
         {
 			const int index = top() + offset;
@@ -275,7 +282,7 @@ public:
         }
 
         template< typename NumT >
-        const bool
+        bool
         pop( NumT& v, int offset = 0 )
 		{
 			const int index = top() + offset;
@@ -294,7 +301,7 @@ public:
         }
 
 		template< typename VecT, unsigned int length >
-		const bool
+		bool
 		pop( VecT& v, int offset = 0 )
 		{
 			int _top	= lua_gettop( state );
@@ -316,7 +323,13 @@ public:
 			return success;
 		}
 
-		const bool
+		/* \brief Peek at the stack - optionally from an offset
+		 * \return true if the stack isn't empty and there's an actual
+		 *     value
+		 *
+		 * \param v the value in the stack
+		 **/
+		bool
 		peek( const char*& v, int offset = 0 )
 		{
 			const int index = top() + offset;
@@ -334,7 +347,7 @@ public:
 			}
 		}
 
-		const bool
+		bool
 		peek( bool& v, int offset = 0 )
 		{
 			const int index = top() + offset;
@@ -358,7 +371,7 @@ public:
 		}
 
 		template< typename NumT >
-		const bool
+		bool
 		peek( NumT& v, int offset = 0 )
 		{
 			const int index = top() + offset;

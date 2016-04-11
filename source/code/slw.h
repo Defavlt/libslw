@@ -316,7 +316,7 @@ public:
 			for ( ; success 
 				&& _top > 0 
 				&& ( success = lua_isnumber( state, state_i ) );
-				--vec_i, --state_i )
+				--vec_i, --state_i, _top = lua_gettop( state ) )
 			{
 				v[ i ] = ( float )lua_tonumber( state, state_i );
 				lua_pop( state, state_i );

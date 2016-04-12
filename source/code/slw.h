@@ -240,13 +240,18 @@ public:
 		 * \note remember to free the value if it's a string
 		 */
 		bool
-        pop( const char*& v, int offset = 0 )
+        pop( const char*& v, int offset = 0, const bool force = false )
         {
 			const int index = top() + offset;
 			const int _top	= lua_gettop( state );
 
             if ( _top == 0 || !lua_isstring( state, index ) )
-                return false;
+			{
+				if ( force )
+					lua_pop( state, 1 );
+
+				return false;
+			}
 
             else
             {
@@ -260,13 +265,18 @@ public:
         }
 
         bool
-        pop( bool& v, int offset = 0 )
+        pop( bool& v, int offset = 0, const bool force = false )
         {
 			const int index = top() + offset;
 			const int _top	= lua_gettop( state );
 
             if ( _top == 0 || !lua_isboolean( state, index ) )
-                return false;
+            {
+				if ( force )
+					lua_pop( state, 1 );
+
+				return false;
+			}
 
             else
             {
@@ -285,13 +295,18 @@ public:
 
         template< typename NumT >
         bool
-        pop( NumT& v, int offset = 0 )
+        pop( NumT& v, int offset = 0, const bool force = false )
 		{
 			const int index = top() + offset;
 			const int _top	= lua_gettop( state );
 
             if ( _top == 0 || !lua_isnumber( state, index ) )
-                return false;
+			{
+				if ( force )
+					lua_pop( state, 1 );
+
+				return false;
+			}
 
             else
             {
@@ -491,7 +506,19 @@ public:
 			: index( index )
 			, state( state )
 		{
-			bool table = lua_istable( state.state, index );
+			bool table = lua_istable( state.state, index );	
+			int top = state.size();
+		}
+
+		Table& Debug( void )
+		{
+			int size = state.size();
+			int type = 0;
+
+			for ( int i = -1; i >= -size; --i )
+				type = lua_type( state.state, i );
+
+			return *this;
 		}
 
 		/* \brief allocate space for and create a new table
@@ -556,67 +583,78 @@ public:
 		 * \note remember to free v if it's a string
 		 **/
 		Table&
-		Get( const char* field, const char*& v, bool& result )
+		Get( const char* field, const char*& v )
 		{
-			if ( result )
-			{
-				lua_getfield( state.state, -1, field );
+			lua_getfield( state.state, -1, field );
 
-				result = state.pop( v );
-			}
+			state.pop( v, 0, true );
 
 			return *this;
 		}
 
 		Table&
-		Get( const char* field, bool& v, bool& result )
+		Get( const char* field, bool& v )
 		{
-			if ( result )
-			{
-				lua_getfield( state.state, -1, field );
+			lua_getfield( state.state, -1, field );
 
-				result = state.pop( v );
-			}
+			state.pop( v, 0, true );
 
 			return *this;
 		}
 
 		template< typename NumT >
 		Table&
-		Get( const char* field, NumT& v, bool& result )
+		Get( const char* field, NumT& v )
 		{
-			if ( result )
-			{
-				lua_getfield( state.state, -1, field );
+			lua_getfield( state.state, -1, field );
 
-				result = state.pop( v );
-			}
+			Debug();
+
+			state.pop( v, 0, true );
 
 			return *this;
 		}
 
 		template< typename VecT, unsigned int length >
 		Table&
-		Get( const char* field, VecT& v, bool& result )
+		Get( const char* field, VecT& v )
 		{
-			if ( result )
+			lua_getfield( state.state, -1, field );
+
+			int type = lua_type( state.state, -1 );
+
+			if ( ( type == LUA_TTABLE ) )
 			{
-				lua_getfield( state.state, -1, field );
+				lua_pushnil( state.state );
 
-				int type = lua_type( state.state, -1 );
+				int i = 0;
 
-				if ( result = ( type == LUA_TTABLE ) )
+				/*
+				* stack:
+				*   1 nil
+				*   2 table
+				*/
+
+				for ( ; /*i < length && */lua_next( state.state, -2 ); ++i )
 				{
-					lua_pushnil( state.state );
+					/*
+					* stack:
+					*   1 value
+					*   2 key
+					*   3 table
+					*/
 
-					int i = 0;
+					state.pop( v[ i ] );
 
-					for ( ; i < length && result && lua_next( state.state, -2 ); ++i )
-					{
-						state.pop( v[ i ] );
-					}
+					/*
+					* stack:
+					*   1 key
+					*   2 table
+					*/
 				}
 			}
+
+			lua_pop( state.state, 1 );
 
 			return *this;
 		}

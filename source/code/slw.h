@@ -317,6 +317,22 @@ public:
             }
         }
 
+		bool
+		pop( int offset = 0 )
+		{
+			const int index = top() + offset;
+			const int _top	= lua_gettop( state );
+
+			if ( _top == 0 )
+				return false;
+
+			else
+			{
+				lua_pop( state, 1 );
+				return true;
+			}
+		}
+
 		template< typename VecT, unsigned int length >
 		bool
 		pop( VecT& v, int offset = 0 )

@@ -762,6 +762,7 @@ public:
         const char*
         call( const unsigned int nresults )
         {
+#if defined( LUA_AS_CPP )
             try
 			{
 				if ( lua_pcall( state.state, args, nresults, 0 ) )
@@ -771,11 +772,14 @@ public:
 
 	                return error? error: "";
 		        }
+
+#if defined( LUA_AS_CPP )
 			}
 			catch ( std::exception* e )
 			{
 				( void )e;
 			}
+#endif
 
             return "";
         }

@@ -484,6 +484,12 @@ public:
 			return lua_gettop( state );
 		}
 
+		int
+		type( int index = -1 )
+		{
+			return lua_type( state, index );
+		}
+
 	protected:
 
 		virtual int

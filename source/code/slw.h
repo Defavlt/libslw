@@ -320,8 +320,7 @@ public:
 		bool
 		pop( int offset = 0 )
 		{
-			const int index = top() + offset;
-			const int _top	= lua_gettop( state );
+			const int _top	= lua_gettop( state ) + offset;
 
 			if ( _top == 0 )
 				return false;

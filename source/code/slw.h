@@ -765,6 +765,15 @@ public:
 #if defined( LUA_AS_CPP )
             try
 			{
+#endif
+				const int fn_index = -( ( int ) ( args ) ) - 1;
+
+				if ( state.type( fn_index ) != LUA_TFUNCTION )
+				{
+					lua_rawgeti( state.state, LUA_REGISTRYINDEX, call_ref );
+					lua_insert( state.state, fn_index );
+				}
+
 				if ( lua_pcall( state.state, args, nresults, 0 ) )
 				{
 		            const char* error = lua_tostring( state.state, 0 );

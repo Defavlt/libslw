@@ -522,8 +522,8 @@ public:
 			: index( index )
 			, state( state )
 		{
-			bool table = lua_istable( state.state, index );	
-			int top = state.size();
+			/*bool table = */lua_istable( state.state, index );	
+			/*int top = state.size();*/
 		}
 
 		Table& Debug( void )
@@ -692,7 +692,40 @@ public:
             , state( _state )
         {
 			Lua::get_field( state.state, fn );
+
+			call_ref = luaL_ref( state.state, LUA_REGISTRYINDEX );
         }
+
+		Call( State& _state, const int index )
+			: args( 0 )
+			, state( _state )
+		{
+			lua_pushvalue( state.state, index );
+
+			call_ref = luaL_ref( state.state, LUA_REGISTRYINDEX );
+		}
+
+		~Call( void )
+		{
+			luaL_unref( state.state, LUA_REGISTRYINDEX, call_ref );
+		}
+
+		Call&
+		clear( void )
+		{
+			args = 0;
+
+			return *this;
+		}
+
+		Call&
+		param( const int v )
+		{
+			lua_pushnumber( state.state, v );
+			++args;
+
+			return *this;
+		}
 
         Call&
         param( const unsigned int v )
@@ -745,6 +778,7 @@ public:
     private:
 		const Call& operator=( const Call& );
 
+		int call_ref;
         unsigned int args;
         Lua::State& state;
     };

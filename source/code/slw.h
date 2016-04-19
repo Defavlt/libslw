@@ -177,7 +177,7 @@ public:
 		friend class Table;
 
         State( void )
-            : state( lua_open() )
+            : state( luaL_newstate() )
         {
             luaL_openlibs( state );
         }

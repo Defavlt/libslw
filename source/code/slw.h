@@ -565,6 +565,8 @@ public:
 			/* stack:
 			 *   1 table
 			 */
+
+			return *this;
 		}
 
 		/* \brief Set table element this[field] = v

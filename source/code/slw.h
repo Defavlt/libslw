@@ -646,7 +646,7 @@ public:
 
 			int type = lua_type( state.state, -1 );
 
-			if ( ( type == LUA_TTABLE ) )
+			if ( type == LUA_TTABLE )
 			{
 				lua_pushnil( state.state );
 

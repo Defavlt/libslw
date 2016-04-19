@@ -759,7 +759,7 @@ public:
             return *this;
         }
 
-        const char*
+        bool
         call( const unsigned int nresults )
         {
 #if defined( LUA_AS_CPP )
@@ -776,10 +776,13 @@ public:
 
 				if ( lua_pcall( state.state, args, nresults, 0 ) )
 				{
-		            const char* error = lua_tostring( state.state, 0 );
-			        lua_pop( state.state, 1 );
+		            const char* error = lua_tostring( state.state, -1 );
 
-	                return error? error: "";
+					__log_error( error );
+
+					lua_pop( state.state, 1 );
+
+					return false;
 		        }
 
 #if defined( LUA_AS_CPP )
@@ -790,7 +793,7 @@ public:
 			}
 #endif
 
-            return "";
+            return true;
         }
 
     private:

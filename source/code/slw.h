@@ -791,7 +791,7 @@ public:
 			}
 			catch ( std::exception* e )
 			{
-				( void )e;
+				throw e;
 			}
 #endif
 

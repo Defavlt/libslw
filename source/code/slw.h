@@ -490,6 +490,16 @@ public:
 			return lua_type( state, index );
 		}
 
+		void
+		debug( void )
+		{
+			int _type = 0;
+			int i = -size();
+
+			for ( ; i < 0; ++i )
+				_type = type( i );
+		}
+
 	protected:
 
 		virtual int

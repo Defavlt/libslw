@@ -476,6 +476,18 @@ public:
 				lua_pushnumber( state, v[ i ] );
 		}
 
+		void
+		setglobal( const char* field )
+		{
+			lua_setglobal( state, field );
+		}
+
+		void
+		dostring( const char* str )
+		{
+			luaL_dostring( state, str );
+		}
+
 		/* \brief the current size of the stack
 		 **/
 		int

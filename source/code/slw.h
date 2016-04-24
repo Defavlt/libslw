@@ -209,12 +209,12 @@ public:
             else
                 luaL_loadstring( state, str );
 
-#define IW_MSC 4800 //performance warning: forcing value to bool
 #include "wpush"
+DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
 
             return lua_pcall( state, 0, LUA_MULTRET, 0 );
 
-#include "wpop"
+ENABLE_WARNING( "", "", 4800 )
         }
 
 		void
@@ -281,13 +281,12 @@ public:
             else
             {
 
-#define IW_MSC 4800 //performance warning: forcing value to bool
 #include "wpush"
+DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
 
                 v = lua_toboolean( state, index );
                 lua_pop( state, 1 );
-
-#include "wpop"
+ENABLE_WARNING( "", "", 4800 )
 
                 return true;
             }
@@ -391,12 +390,12 @@ public:
 			else
 			{
 
-#define IW_MSC 4800 //performance warning: forcing value to bool
 #include "wpush"
+DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
 
 				v = lua_toboolean( state, index );
 
-#include "wpop"
+ENABLE_WARNING( "", "", 4800 )
 
 				return true;
 			}
@@ -420,8 +419,8 @@ public:
 			}
 		}
 
-#define IW_MSC 4706 //assignment within conditional expression
 #include "wpush"
+DISABLE_WARNING( "", "", 4706 ) //assignment within conditional expression
 
 		template< typename VecT, unsigned int length >
 		bool
@@ -447,7 +446,7 @@ public:
 			return success;
 		}
 
-#include "wpop"
+ENABLE_WARNING( "", "", 4706 )
 
 		void
 		push( const char* v )

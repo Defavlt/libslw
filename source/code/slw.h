@@ -801,8 +801,10 @@ ENABLE_WARNING( "", "", 4706 )
 				{
 		            const char* error = lua_tostring( state.state, -1 );
 
+#include "wpush"
+					DISABLE_WARNING( "-Wformat-security", "-Wformat-security", 4000 )
 					__log_error( error );
-
+					ENABLE_WARNING( "-Wformat-security", "-Wformat-security", 4000 )
 					lua_pop( state.state, 1 );
 
 					return false;

@@ -621,6 +621,22 @@ ENABLE_WARNING( "", "", 4706 )
 			return *this;
 		}
 
+		template< typename VecT, unsigned int length >
+		Table&
+		Set( const VecT v )
+		{
+			for ( unsigned int i = 0; i < length; ++i )
+			{
+				state.push( v[ i ] );
+				state.debug();
+
+				// remember: lua array fields start 1
+				lua_rawseti( state.state, -2, i + 1 );
+			}
+
+			return *this;
+		}
+
 		/* \brief Get table element this[field]
 		 * \note Reuse the `result´ in subsequent calls
 		 *     for a neat abort on error effect

@@ -25,16 +25,16 @@
 
 #include <lua.hpp>
 
-#ifndef __log_msg
-    #define __log_msg printf
+#ifndef log_msg
+    #define log_msg printf
 #endif
 
-#ifndef __log_error
-    #define __log_error printf
+#ifndef log_error
+    #define log_error printf
 #endif
 
-#ifndef __log_warning
-    #define __log_warning printf
+#ifndef log_warning
+    #define log_warning printf
 #endif
 
 #define __LUA_ENTRY_OUT int
@@ -99,7 +99,7 @@ namespace Lua
 
 						if ( !lua_istable( state, -2 ) )
 						{
-							__log_error( "Attempt to index a nil value ('%s')\n", fn_or_obj );
+							log_error( "Attempt to index a nil value ('%s')\n", fn_or_obj );
 
 							lua_pop( state, ( int ) level );
 							return false;
@@ -131,7 +131,7 @@ namespace Lua
 		{
 			if ( lua_isnil( state, -1 ) )
 			{
-				__log_error( "Attempt to index a nil value ('%s')\n", fn_or_obj );
+				log_error( "Attempt to index a nil value ('%s')\n", fn_or_obj );
 				lua_pop( state, ( int ) level );
 
 				return false;
@@ -153,7 +153,7 @@ namespace Lua
 
 				else
 				{
-					__log_error( "Attempt to index a nil value ('%s')\n", fn_or_obj );
+					log_error( "Attempt to index a nil value ('%s')\n", fn_or_obj );
 					lua_pop( state, ( int ) level );
 
 					return false;
@@ -819,7 +819,7 @@ ENABLE_WARNING( "", "", 4706 )
 
 #include "wpush"
 					DISABLE_WARNING( "-Wformat-security", "-Wformat-security", 4000 )
-					__log_error( error );
+					log_error( error );
 					ENABLE_WARNING( "-Wformat-security", "-Wformat-security", 4000 )
 					lua_pop( state.state, 1 );
 

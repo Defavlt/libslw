@@ -1,5 +1,5 @@
 /**
-* Copyright © Marcus Hansson <marcus.hansson@email.com>
+* Copyright © The Authors
 *
 *    This program is free software: you can redistribute it and/or modify
 *    it under the terms of the GNU General Public License as published by
@@ -13,6 +13,10 @@
 *
 *    You should have received a copy of the GNU General Public License
 *    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*	Authors:
+*	Marcus Hansson <marcus.hansson@email.com>
+*	André Andersson <andre.eric.andersson@gmail.com>
 **/
 
 #ifndef __LUA_H_INCLUDED__
@@ -545,7 +549,7 @@ ENABLE_WARNING( "", "", 4706 )
 	public:
 
 		Table( Lua::State& state, const int index = -1 )
-			: index( index )
+			: index( (index > 0)? index * -1: index )
 			, state( state )
 		{
 			/*bool table = */lua_istable( state.state, index );	
@@ -581,7 +585,7 @@ ENABLE_WARNING( "", "", 4706 )
 		{
 			Lua::get_field( state.state, field );
 
-			result = lua_istable( state.state, -1 );
+			result = lua_istable( state.state, index );
 
 			/* stack:
 			 *   1 table
@@ -597,7 +601,7 @@ ENABLE_WARNING( "", "", 4706 )
 		Set( const char* field, const char* v )
 		{
 			state.push( v );
-			lua_setfield( state.state, -1, field );
+			lua_setfield( state.state, index, field );
 
 			return *this;
 		}
@@ -606,7 +610,7 @@ ENABLE_WARNING( "", "", 4706 )
 		Set( const char* field, bool v )
 		{
 			state.push( v );
-			lua_setfield( state.state, -1, field );
+			lua_setfield( state.state, index, field );
 
 			return *this;
 		}
@@ -616,7 +620,7 @@ ENABLE_WARNING( "", "", 4706 )
 		Set( const char* field, NumT v )
 		{
 			state.push( v );
-			lua_setfield( state.state, -1, field );
+			lua_setfield( state.state, index, field );
 
 			return *this;
 		}
@@ -631,7 +635,7 @@ ENABLE_WARNING( "", "", 4706 )
 				state.debug();
 
 				// remember: lua array fields start 1
-				lua_rawseti( state.state, -2, i + 1 );
+				lua_rawseti( state.state, index - 1, i + 1 );
 			}
 
 			return *this;
@@ -645,7 +649,7 @@ ENABLE_WARNING( "", "", 4706 )
 		Table&
 		Get( const char* field, const char*& v )
 		{
-			lua_getfield( state.state, -1, field );
+			lua_getfield( state.state, index, field );
 
 			state.pop( v, 0, true );
 
@@ -655,7 +659,7 @@ ENABLE_WARNING( "", "", 4706 )
 		Table&
 		Get( const char* field, bool& v )
 		{
-			lua_getfield( state.state, -1, field );
+			lua_getfield( state.state, index, field );
 
 			state.pop( v, 0, true );
 
@@ -666,7 +670,7 @@ ENABLE_WARNING( "", "", 4706 )
 		Table&
 		Get( const char* field, NumT& v )
 		{
-			lua_getfield( state.state, -1, field );
+			lua_getfield( state.state, index, field );
 
 			Debug();
 
@@ -679,9 +683,9 @@ ENABLE_WARNING( "", "", 4706 )
 		Table&
 		Get( const char* field, VecT& v )
 		{
-			lua_getfield( state.state, -1, field );
+			lua_getfield( state.state, index, field );
 
-			int type = lua_type( state.state, -1 );
+			int type = lua_type( state.state, index );
 
 			if ( type == LUA_TTABLE )
 			{
@@ -695,7 +699,84 @@ ENABLE_WARNING( "", "", 4706 )
 				*   2 table
 				*/
 
-				for ( ; /*i < length && */lua_next( state.state, -2 ); ++i )
+				for ( ; /*i < length && */lua_next( state.state, index - 1 ); ++i )
+				{
+					/*
+					* stack:
+					*   1 value
+					*   2 key
+					*   3 table
+					*/
+
+					state.pop( v[ i ] );
+
+					/*
+					* stack:
+					*   1 key
+					*   2 table
+					*/
+				}
+			}
+
+			lua_pop( state.state, 1 );
+
+			return *this;
+		}
+
+		Table&
+		Get( int field, bool& v )
+		{
+			lua_rawgeti( state.state, index, field );
+
+			state.pop( v, 0, true );
+
+			return *this;
+		}
+
+		Table&
+		Get( int field, const char*& v )
+		{
+			lua_rawgeti( state.state, index, field );
+
+			state.pop( v, 0, true );
+
+			return *this;
+		}
+
+		template< typename NumT >
+		Table&
+		Get( int field, NumT& v )
+		{
+			lua_rawgeti( state.state, index, field );
+
+			Debug();
+
+			state.pop( v, 0, true );
+
+			return *this;
+		}
+
+		template< typename VecT, unsigned int length >
+		Table&
+		Get( int field, VecT& v )
+		{
+			lua_rawgeti( state.state, index, field );
+
+			int type = lua_type( state.state, index );
+
+			if ( type == LUA_TTABLE )
+			{
+				lua_pushnil( state.state );
+
+				int i = 0;
+
+				/*
+				* stack:
+				*   1 nil
+				*   2 table
+				*/
+
+				for ( ; /*i < length && */lua_next( state.state, index - 1 ); ++i )
 				{
 					/*
 					* stack:

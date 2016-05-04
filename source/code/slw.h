@@ -879,6 +879,14 @@ ENABLE_WARNING( "", "", 4706 )
             return *this;
         }
 
+		Call&
+		param( void )
+		{
+			++args;
+
+			return *this;
+		}
+
         bool
         call( const unsigned int nresults )
         {

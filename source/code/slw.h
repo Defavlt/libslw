@@ -98,9 +98,6 @@ namespace Lua
 						lua_pushstring( state, substr );
 						++level;
 
-						// lua copies the string internally
-						free( substr );
-
 						if ( !lua_istable( state, -2 ) )
 						{
 							log_error( "Attempt to index a nil value ('%s')\n", fn_or_obj );
@@ -115,6 +112,9 @@ namespace Lua
 							lua_remove( state, -2 );
 						}
 					}
+
+					// lua copies the string internally
+					free( substr );
 
 					++current_i;
 					boundary = current_i;

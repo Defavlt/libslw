@@ -265,7 +265,6 @@ ENABLE_WARNING( "", "", 4800 )
             else
             {
 
-#include "wpush"
 DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
 
                 v = lua_toboolean( state, index );
@@ -374,7 +373,6 @@ ENABLE_WARNING( "", "", 4800 )
 			else
 			{
 
-#include "wpush"
 DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
 
 				v = lua_toboolean( state, index );
@@ -403,7 +401,6 @@ ENABLE_WARNING( "", "", 4800 )
 			}
 		}
 
-#include "wpush"
 DISABLE_WARNING( "", "", 4706 ) //assignment within conditional expression
 
 		template< typename VecT, unsigned int length >

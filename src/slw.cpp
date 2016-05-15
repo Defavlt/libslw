@@ -1,15 +1,15 @@
 #include "slw/slw.h"
 
 int
-Lua::State::handlers = 0;
+SLW::State::handlers = 0;
 
 int
-Lua::State::handler( lua_State* state )
+SLW::State::handler( lua_State* state )
 {
-	Lua::State::EntryPoint* point = NULL;
+	SLW::State::EntryPoint* point = NULL;
 
 	point = 
-		( Lua::State::EntryPoint* ) 
+		( SLW::State::EntryPoint* ) 
 		( size_t )
 		( lua_tonumber( state, lua_upvalueindex( 1 ) ) );
 

@@ -45,11 +45,11 @@
 #endif
 
 #define __LUA_ENTRY_OUT int
-#define __LUA_ENTRY_IN ( Lua::State& state, void* user )
+#define __LUA_ENTRY_IN ( SLW::State& state, void* user )
 
 #define __LUA_ENTRY( NAME ) __LUA_ENTRY_OUT NAME __LUA_ENTRY_IN
 
-namespace Lua
+namespace SLW
 {
 
 	static inline bool
@@ -202,9 +202,9 @@ ENABLE_WARNING( "", "", 4800 )
         }
 
 		void
-		registerfn( const char* event, Lua::Entry callback, void* user = NULL )
+		registerfn( const char* event, SLW::Entry callback, void* user = NULL )
 		{
-			Lua::State::EntryPoint* point = new Lua::State::EntryPoint;
+			SLW::State::EntryPoint* point = new SLW::State::EntryPoint;
 
 			point->entry = callback;
 			point->event = event;
@@ -525,9 +525,9 @@ ENABLE_WARNING( "", "", 4706 )
 
 		struct EntryPoint
 		{
-			Lua::Entry	entry;
+			SLW::Entry	entry;
 			const char* event;
-			Lua::State* state;
+			SLW::State* state;
 			void*		user;
 		};
 
@@ -543,7 +543,7 @@ ENABLE_WARNING( "", "", 4706 )
 	{
 	public:
 
-		Table( Lua::State& state, const int index = -1 )
+		Table( SLW::State& state, const int index = -1 )
 			: index( (index > 0)? index * -1: index )
 			, state( state )
 		{
@@ -578,7 +578,7 @@ ENABLE_WARNING( "", "", 4706 )
 		Table&
 		Find( const char* field, bool& result )
 		{
-			Lua::get_field( state.state, field );
+			SLW::get_field( state.state, field );
 
 			result = lua_istable( state.state, index );
 

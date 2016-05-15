@@ -29,6 +29,8 @@
 
 #include <lua.hpp>
 
+#include "slw/warnings.h"
+
 #ifndef log_msg
     #define log_msg printf
 #endif
@@ -213,7 +215,6 @@ public:
             else
                 luaL_loadstring( state, str );
 
-#include "wpush"
 DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
 
             return lua_pcall( state, 0, LUA_MULTRET, 0 );

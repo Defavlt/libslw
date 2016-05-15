@@ -33,3 +33,6 @@
 #  define ENABLE_WARNING(gcc_option,clang_option,msvc_unused) DIAG_PRAGMA(GCC,warning DIAG_JOINSTR(-W,gcc_option))
 # endif
 #endif
+
+// warning number '4000' not a valid compiler warning 
+DISABLE_WARNING( "", "", 4616 );

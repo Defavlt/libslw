@@ -30,6 +30,7 @@
 #include <lua.hpp>
 
 #include "slw/warnings.h"
+#include "slw/cstrings.h"
 
 #ifndef log_msg
     #define log_msg printf
@@ -47,28 +48,6 @@
 #define __LUA_ENTRY_IN ( Lua::State& state, void* user )
 
 #define __LUA_ENTRY( NAME ) __LUA_ENTRY_OUT NAME __LUA_ENTRY_IN
-
-/* \brief Dynamic string copy
- *     Copies `length` characters from `src`, starting at `start`.
- * \param src the source string
- * \param start the starting index
- * \param lenght the length of the sub string
- * \return a pointer to the sub string
- * \note `Start + length < strlen(src)´ required
- * \note Remember to `free` your substring when done
- */
-static inline char*
-strdcpy (
-    const char* const src,
-    const unsigned int start,
-    const unsigned int length )
-{
-    char* substr = ( char* ) malloc( 1 + length * sizeof( char ) );
-    memcpy( substr, src + start, length + 1 );
-    substr[ length ] = ( char )0;
-
-    return substr;
-}
 
 namespace Lua
 {
@@ -90,7 +69,7 @@ namespace Lua
 			case '.':
 				{
 					const unsigned int block_l = current_i - boundary;
-					char* substr = strdcpy( fn_or_obj, boundary, block_l );
+					char* substr = SLW::strdcpy( fn_or_obj, boundary, block_l );
 
 					if ( !boundary )
 						lua_getglobal( state, substr );
@@ -146,7 +125,7 @@ namespace Lua
 			else
 			{
 				const unsigned int block_l = current_i - boundary;
-				char* substr = strdcpy( fn_or_obj, boundary, block_l );
+				char* substr = SLW::strdcpy( fn_or_obj, boundary, block_l );
 
 				lua_pushstring( state, substr );
 				++level;
@@ -261,7 +240,7 @@ ENABLE_WARNING( "", "", 4800 )
             else
             {
                 v = lua_tostring( state, index );
-				v = strdcpy( v, 0, strlen( v ) );
+				v = SLW::strdcpy( v, 0, strlen( v ) );
 
                 lua_pop( state, 1 );
 
@@ -377,7 +356,7 @@ ENABLE_WARNING( "", "", 4800 )
 			else
 			{
 				v = lua_tostring( state, index );
-				v = strdcpy( v, 0, strlen( v ) );
+				v = SLW::strdcpy( v, 0, strlen( v ) );
 
 				return true;
 			}

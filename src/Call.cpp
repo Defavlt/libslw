@@ -1,6 +1,8 @@
 #include "slw/Call.h"
 #include "slw/State.h"
 
+#include "slw/get_field.h"
+
 #include <lua.hpp>
 
 SLW::Call::Call( SLW::State& state, const char* fn ) 

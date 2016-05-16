@@ -19,41 +19,26 @@
 *	André Andersson <andre.eric.andersson@gmail.com>
 **/
 
-#ifndef __LUA_H_INCLUDED__
-#define __LUA_H_INCLUDED__
-
-#include <cstdlib>
-#include <cstring>
+#ifndef SLW_STATE_H
+#define SLW_STATE_H
 
 #include <exception>
 
-#include <lua.hpp>
-
+#include "slw/types.h"
 #include "slw/warnings.h"
 #include "slw/cstrings.h"
+#include "slw/stdout.h"
 
-#ifndef log_msg
-    #define log_msg printf
-#endif
+#define _LUA_ENTRY_OUT int
+#define _LUA_ENTRY_IN ( SLW::State& state, void* user )
 
-#ifndef log_error
-    #define log_error printf
-#endif
-
-#ifndef log_warning
-    #define log_warning printf
-#endif
-
-#define __LUA_ENTRY_OUT int
-#define __LUA_ENTRY_IN ( SLW::State& state, void* user )
-
-#define __LUA_ENTRY( NAME ) __LUA_ENTRY_OUT NAME __LUA_ENTRY_IN
+#define __LUA_ENTRY( NAME ) _LUA_ENTRY_OUT NAME _LUA_ENTRY_IN
 
 namespace SLW
 {
 	class State;
 
-	typedef __LUA_ENTRY_OUT (*Entry) __LUA_ENTRY_IN;
+	typedef _LUA_ENTRY_OUT ( *Entry ) _LUA_ENTRY_IN;
 
     class State
     {
@@ -61,11 +46,7 @@ public:
         friend class Call;
 		friend class Table;
 
-        State( void )
-            : state( luaL_newstate() )
-        {
-            luaL_openlibs( state );
-        }
+        State( void );
 
 		State( State& _state )
 			: state( NULL )
@@ -73,48 +54,15 @@ public:
 			state = _state.state;
 		}
 
-		State( lua_State* _state )
-			: state( _state )
-		{
+		State( lua_State* _state );
 
-		}
-
-        ~State( void )
-        {
-            lua_close( state );
-            state = NULL;
-        }
+        virtual ~State( void );
 
         bool
-        load( const char* str, const bool str_is_file = true )
-        {
-            if ( str_is_file )
-                luaL_loadfile( state, str );
-
-            else
-                luaL_loadstring( state, str );
-
-DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
-
-            return lua_pcall( state, 0, LUA_MULTRET, 0 );
-
-ENABLE_WARNING( "", "", 4800 )
-        }
+        load( const char* str, const bool str_is_file = true );
 
 		void
-		registerfn( const char* event, SLW::Entry callback, void* user = NULL )
-		{
-			SLW::State::EntryPoint* point = new SLW::State::EntryPoint;
-
-			point->entry = callback;
-			point->event = event;
-			point->state = this;
-			point->user	 = user;
-
-			lua_pushnumber( state, ( size_t )( point ) );
-			lua_pushcclosure( state, &handler, 1 );
-			lua_setglobal( state, event );
-		}
+		registerfn( const char* event, SLW::Entry callback, void* user = NULL );
 		
 		/* \brief Pop a value from the stack, optionally at an offset 
 		 * \return true if the stack isn't empty and there's an actual
@@ -124,56 +72,13 @@ ENABLE_WARNING( "", "", 4800 )
 		 * \note remember to free the value if it's a string
 		 */
 		bool
-        pop( const char*& v, int offset = 0, const bool force = false )
-        {
-			const int index = top() + offset;
-			const int _top	= lua_gettop( state );
-
-            if ( _top == 0 || !lua_isstring( state, index ) )
-			{
-				if ( force )
-					lua_pop( state, 1 );
-
-				return false;
-			}
-
-            else
-            {
-                v = lua_tostring( state, index );
-				v = SLW::strdcpy( v, 0, strlen( v ) );
-
-                lua_pop( state, 1 );
-
-                return true;
-            }
-        }
+        pop( const char*& v, int offset = 0, const bool force = false );
 
         bool
-        pop( bool& v, int offset = 0, const bool force = false )
-        {
-			const int index = top() + offset;
-			const int _top	= lua_gettop( state );
+        pop( bool& v, int offset = 0, const bool force = false );
 
-            if ( _top == 0 || !lua_isboolean( state, index ) )
-            {
-				if ( force )
-					lua_pop( state, 1 );
-
-				return false;
-			}
-
-            else
-            {
-
-DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
-
-                v = lua_toboolean( state, index );
-                lua_pop( state, 1 );
-ENABLE_WARNING( "", "", 4800 )
-
-                return true;
-            }
-        }
+		bool
+		pop( int offset = 0 );
 
         template< typename NumT >
         bool
@@ -198,21 +103,6 @@ ENABLE_WARNING( "", "", 4800 )
                 return true;
             }
         }
-
-		bool
-		pop( int offset = 0 )
-		{
-			const int _top	= lua_gettop( state ) + offset;
-
-			if ( _top == 0 )
-				return false;
-
-			else
-			{
-				lua_pop( state, 1 );
-				return true;
-			}
-		}
 
 		template< typename VecT, unsigned int length >
 		bool
@@ -244,44 +134,10 @@ ENABLE_WARNING( "", "", 4800 )
 		 * \param v the value in the stack
 		 **/
 		bool
-		peek( const char*& v, int offset = 0 )
-		{
-			const int index = top() + offset;
-			const int _top	= lua_gettop( state );
-
-			if ( _top == 0 || !lua_isstring( state, index ) )
-				return false;
-
-			else
-			{
-				v = lua_tostring( state, index );
-				v = SLW::strdcpy( v, 0, strlen( v ) );
-
-				return true;
-			}
-		}
+		peek( const char*& v, int offset = 0 );
 
 		bool
-		peek( bool& v, int offset = 0 )
-		{
-			const int index = top() + offset;
-			const int _top	= lua_gettop( state );
-
-			if ( _top == 0 || !lua_isboolean( state, index ) )
-				return false;
-
-			else
-			{
-
-DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
-
-				v = lua_toboolean( state, index );
-
-ENABLE_WARNING( "", "", 4800 )
-
-				return true;
-			}
-		}
+		peek( bool& v, int offset = 0 );
 
 		template< typename NumT >
 		bool
@@ -330,16 +186,10 @@ DISABLE_WARNING( "", "", 4706 ) //assignment within conditional expression
 ENABLE_WARNING( "", "", 4706 )
 
 		void
-		push( const char* v )
-		{
-			lua_pushstring( state, v );
-		}
+		push( const char* v );
 
 		void
-		push( const bool v )
-		{
-			lua_pushboolean( state, v );
-		}
+		push( const bool v );
 
 		template< typename NumT >
 		void
@@ -348,64 +198,19 @@ ENABLE_WARNING( "", "", 4706 )
 			lua_pushnumber( state, v );
 		}
 
-		template< typename VecT, unsigned int length >
 		void
-		push( const VecT v )
-		{
-			for ( unsigned int i = 0; i < length; ++i )
-				lua_pushnumber( state, v[ i ] );
-		}
+		setglobal( const char* field );
 
 		void
-		setglobal( const char* field )
-		{
-			lua_setglobal( state, field );
-		}
-
-		void
-		dostring( const char* str )
-		{
-			luaL_dostring( state, str );
-		}
+		dostring( const char* str );
 
 		/* \brief the current size of the stack
 		 **/
 		int
-		size( void )
-		{
-			return lua_gettop( state );
-		}
+		size( void );
 
 		int
-		type( int index = -1 )
-		{
-			return lua_type( state, index );
-		}
-
-		void
-		debug( void )
-		{
-			/*
-				LUA_TNONE		(-1)
-				LUA_TNIL		0
-				LUA_TBOOLEAN		1
-				LUA_TLIGHTUSERDATA	2
-				LUA_TNUMBER		3
-				LUA_TSTRING		4
-				LUA_TTABLE		5
-				LUA_TFUNCTION		6
-				LUA_TUSERDATA		7
-				LUA_TTHREAD		8
-
-				LUA_NUMTAGS		9
-			*/
-
-			int _type = 0;
-			int i = -size();
-
-			for ( ; i < 0; ++i )
-				_type = type( i );
-		}
+		type( int index = -1 );
 
 	protected:
 
@@ -432,273 +237,6 @@ ENABLE_WARNING( "", "", 4706 )
 
 		static int handlers;
     };
-
-	/* \brief Create or modify a table
-	 *
-	 **/
-	class Table
-	{
-	public:
-
-		Table( SLW::State& state, const int index = -1 )
-			: index( (index > 0)? index * -1: index )
-			, state( state )
-		{
-			/*bool table = */lua_istable( state.state, index );	
-			/*int top = state.size();*/
-		}
-
-		Table& Debug( void )
-		{
-			int size = state.size();
-			int type = 0;
-
-			for ( int i = -1; i >= -size; --i )
-				type = lua_type( state.state, i );
-
-			return *this;
-		}
-
-		/* \brief allocate space for and create a new table
-		 * \param narr number of array elements
-		 * \param nrec number of non-array elements
-		 *
-		 **/
-		Table&
-		Allocate( const int narr, const int nrec )
-		{
-			lua_createtable( state.state, narr, nrec );
-
-			return *this;
-		}
-
-		Table&
-		Find( const char* field, bool& result )
-		{
-			SLW::get_field( state.state, field );
-
-			result = lua_istable( state.state, index );
-
-			/* stack:
-			 *   1 table
-			 */
-
-			return *this;
-		}
-
-		/* \brief Set table element this[field] = v
-		 *
-		 **/
-		Table&
-		Set( const char* field, const char* v )
-		{
-			state.push( v );
-			lua_setfield( state.state, index, field );
-
-			return *this;
-		}
-
-		Table&
-		Set( const char* field, bool v )
-		{
-			state.push( v );
-			lua_setfield( state.state, index, field );
-
-			return *this;
-		}
-
-		template< typename NumT >
-		Table&
-		Set( const char* field, NumT v )
-		{
-			state.push( v );
-			lua_setfield( state.state, index, field );
-
-			return *this;
-		}
-
-		template< typename VecT, unsigned int length >
-		Table&
-		Set( const VecT v )
-		{
-			for ( unsigned int i = 0; i < length; ++i )
-			{
-				state.push( v[ i ] );
-				state.debug();
-
-				// remember: lua array fields start 1
-				lua_rawseti( state.state, index - 1, i + 1 );
-			}
-
-			return *this;
-		}
-
-		/* \brief Get table element this[field]
-		 * \note Reuse the `result´ in subsequent calls
-		 *     for a neat abort on error effect
-		 * \note remember to free v if it's a string
-		 **/
-		Table&
-		Get( const char* field, const char*& v )
-		{
-			lua_getfield( state.state, index, field );
-
-			state.pop( v, 0, true );
-
-			return *this;
-		}
-
-		Table&
-		Get( const char* field, bool& v )
-		{
-			lua_getfield( state.state, index, field );
-
-			state.pop( v, 0, true );
-
-			return *this;
-		}
-
-		template< typename NumT >
-		Table&
-		Get( const char* field, NumT& v )
-		{
-			lua_getfield( state.state, index, field );
-
-			Debug();
-
-			state.pop( v, 0, true );
-
-			return *this;
-		}
-
-		template< typename VecT, unsigned int length >
-		Table&
-		Get( const char* field, VecT& v )
-		{
-			lua_getfield( state.state, index, field );
-
-			int type = lua_type( state.state, index );
-
-			if ( type == LUA_TTABLE )
-			{
-				lua_pushnil( state.state );
-
-				int i = 0;
-
-				/*
-				* stack:
-				*   1 nil
-				*   2 table
-				*/
-
-				for ( ; /*i < length && */lua_next( state.state, index - 1 ); ++i )
-				{
-					/*
-					* stack:
-					*   1 value
-					*   2 key
-					*   3 table
-					*/
-
-					state.pop( v[ i ] );
-
-					/*
-					* stack:
-					*   1 key
-					*   2 table
-					*/
-				}
-			}
-
-			lua_pop( state.state, 1 );
-
-			return *this;
-		}
-
-		Table&
-		Get( int field, bool& v )
-		{
-			lua_rawgeti( state.state, index, field );
-
-			state.pop( v, 0, true );
-
-			return *this;
-		}
-
-		Table&
-		Get( int field, const char*& v )
-		{
-			lua_rawgeti( state.state, index, field );
-
-			state.pop( v, 0, true );
-
-			return *this;
-		}
-
-		template< typename NumT >
-		Table&
-		Get( int field, NumT& v )
-		{
-			lua_rawgeti( state.state, index, field );
-
-			Debug();
-
-			state.pop( v, 0, true );
-
-			return *this;
-		}
-
-		template< typename VecT, unsigned int length >
-		Table&
-		Get( int field, VecT& v )
-		{
-			lua_rawgeti( state.state, index, field );
-
-			int type = lua_type( state.state, index );
-
-			if ( type == LUA_TTABLE )
-			{
-				lua_pushnil( state.state );
-
-				int i = 0;
-
-				/*
-				* stack:
-				*   1 nil
-				*   2 table
-				*/
-
-				for ( ; /*i < length && */lua_next( state.state, index - 1 ); ++i )
-				{
-					/*
-					* stack:
-					*   1 value
-					*   2 key
-					*   3 table
-					*/
-
-					state.pop( v[ i ] );
-
-					/*
-					* stack:
-					*   1 key
-					*   2 table
-					*/
-				}
-			}
-
-			lua_pop( state.state, 1 );
-
-			return *this;
-		}
-
-	private:
-		const Table& operator=( const Table& );
-
-		const int index;
-
-		SLW::State& state;
-	};
 }
 
-#endif // __LUA_H_INCLUDED__
+#endif // SLW_STATE_H

@@ -1,8 +1,8 @@
 #### PROJECT SETTINGS ####
 # The name of the executable to be created
-BIN_NAME := slw
+BIN_NAME := libslw.so.0
 # Compiler used
-CXX ?= gcc
+CXX ?= g++
 # Extension of source files used in the project
 SRC_EXT = cpp
 # Path to the source directory, relative to the makefile
@@ -12,7 +12,7 @@ INC_PATH = ./include
 # Space-separated pkg-config libraries used by this project
 LIBS = lua5.1
 # General compiler flags
-COMPILE_FLAGS = -std=c++11 -Wall -Wextra -g
+COMPILE_FLAGS = -shared -fPIC -Wl,-soname,$(BIN_NAME) -std=c++11 -Wall -Wextra -g
 # Additional release-specific flags
 RCOMPILE_FLAGS = -D NDEBUG
 # Additional debug-specific flags
@@ -20,7 +20,7 @@ DCOMPILE_FLAGS = -D DEBUG
 # Add additional include paths
 INCLUDES = -I $(INC_PATH)  
 # General linker settings
-LINK_FLAGS = #-llua5.1
+LINK_FLAGS = -shared -fPIC
 # Additional release-specific linker settings
 RLINK_FLAGS =
 # Additional debug-specific linker settings

@@ -25,3 +25,8 @@
 const int slw::internal::indexes::globals(LUA_GLOBALSINDEX);
 const int slw::internal::indexes::registry(LUA_REGISTRYINDEX);
 const int slw::internal::indexes::environ(LUA_ENVIRONINDEX);
+
+int slw::internal::indexes::upvalue(int offset)
+{
+    return lua_upvalueindex(offset);
+}

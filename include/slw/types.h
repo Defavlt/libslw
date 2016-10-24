@@ -52,6 +52,8 @@ namespace slw
         extern const int globals;
         extern const int registry;
         extern const int environ;
+
+        int upvalue(int offset = 0);
     };
     }
 }

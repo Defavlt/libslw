@@ -36,6 +36,11 @@ public:
      */
     Call(slw::State &state, slw::string_t);
 
+    /* \brief construct a new callback by
+     *   using the supplied function, name, and optional user data
+     */
+    Call(slw::State &, slw::string_t event, slw::entry_t, void * = nullptr);
+
     /* \brief construct a new SLW::Call by
      *   using the supplied index
      */
@@ -73,10 +78,26 @@ public:
 private:
     const Call &operator=( const Call &);
 
-    int call_ref;
-    unsigned int args;
+    static int handler( lua_State *state );
+
+    struct entry_data_t {
+        entry_data_t(const entry_data_t &);
+        entry_data_t(slw::entry_t, slw::string_t, slw::Call &, void *);
+
+        slw::entry_t entry;
+        string_t event;
+        slw::Call &call;
+        void *user;
+    };
+
+    typedef std::vector<entry_data_t> entries_t;
+
+    entries_t entries;
+
     slw::State &state;
+    int call_ref;
     bool isValid;
+    unsigned int args;
 };
 }
 

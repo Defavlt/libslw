@@ -40,6 +40,12 @@ typedef int (* entry_t) (slw::State &, void *);
 
 class State
 {
+private:
+    static const char *const magic;
+
+    int ref();
+    int deref();
+
 public:
     friend class slw::Call;
     friend class slw::Field;
@@ -53,8 +59,6 @@ public:
 
     bool
     load(const char *str, const bool str_is_file = true);
-
-    void registerfn(string_t event, slw::entry_t, void *user = NULL);
 
     template<typename _value_t>
     _value_t pop(_value_t _defaults)
@@ -126,26 +130,6 @@ public:
     int top();
 
     lua_State *state;
-
-private:
-
-    static int handler( lua_State *state );
-
-    struct entry_data_t {
-        entry_data_t(const entry_data_t &);
-        entry_data_t(slw::entry_t, slw::string_t, slw::State &, void *);
-
-        slw::entry_t entry;
-        string_t event;
-        slw::State &state;
-        void *user;
-    };
-
-    typedef std::vector<entry_data_t> entries_t;
-
-    entries_t entries;
-
-    static int handlers;
 };
 } //namespace slw
 

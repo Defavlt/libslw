@@ -45,35 +45,38 @@ slw::State::State(lua_State *state)
 
 slw::State::~State()
 {
+    for (entry_data_t &entry: entries) {
+        push();
+        lua_setglobal(state, entry.event.c_str());
+    }
+
     lua_close(state);
     state = NULL;
 }
 
 bool
-slw::State::load(const char *str, const bool str_is_file /* = true */)
+slw::State::load(const char *str, const bool isFile /* = true */)
 {
-    if ( str_is_file )
-        luaL_loadfile( state, str );
+    if (isFile)
+        luaL_loadfile(state, str);
 
     else
-        luaL_loadstring( state, str );
+        luaL_loadstring(state, str);
 
-    return lua_pcall( state, 0, LUA_MULTRET, 0 );
+    return lua_pcall(state, 0, LUA_MULTRET, 0);
 }
 
 void
-slw::State::registerfn( const char *event, slw::entry_t callback, void *user /* = NULL */ )
+slw::State::registerfn(slw::string_t event, slw::entry_t callback, void *user /* = NULL */)
 {
-    slw::State::entry_data_t *point = new slw::State::entry_data_t;
+    lua_pushlightuserdata(state, this);
+    push((int) entries.size());
 
-    point->entry = callback;
-    point->event = event;
-    point->state = this;
-    point->user	 = user;
+    lua_pushcclosure(state, &handler, 2);
+    lua_setglobal(state, event.c_str());
 
-    lua_pushlightuserdata(state, point);
-    lua_pushcclosure(state, &handler, 1);
-    lua_setglobal(state, event);
+    entry_data_t entry (callback, event, *this, user);
+    entries.push_back(entry);
 }
 
 bool slw::State::pop(slw::string_t &value, bool force)
@@ -201,11 +204,31 @@ int slw::State::top()
     return lua_gettop(state);
 }
 
-int slw::State::handler(lua_State *state)
+int slw::State::handler(lua_State *ptr_state)
 {
-    slw::State::entry_data_t *point =
-        (slw::State::entry_data_t *)
-        (lua_touserdata(state, lua_upvalueindex(1)));
+    slw::State &state = *(slw::State *)lua_touserdata(ptr_state, lua_upvalueindex(1));
+    int entry_i = 0;
 
-    return (*point->entry)(*point->state, point->user);
+    state.peek(entry_i, lua_upvalueindex(2));
+
+    slw::State::entry_data_t &entry = state.entries[entry_i];
+
+    return (*entry.entry)(entry.state, entry.user);
+}
+
+slw::State::entry_data_t::entry_data_t(const entry_data_t &rhs)
+    : entry(rhs.entry)
+    , event(rhs.event)
+    , state(rhs.state)
+    , user(rhs.user)
+{
+}
+
+slw::State::entry_data_t::entry_data_t(slw::entry_t entry, slw::string_t event, slw::State &state, void *user)
+    : entry(entry)
+    , event(event)
+    , state(state)
+    , user(user)
+{
+
 }

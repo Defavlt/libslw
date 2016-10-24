@@ -27,19 +27,8 @@
 #include "slw/types.h"
 
 namespace slw {
-
-/* Usage:
-
-  State st;
-
-  Field g_age_field(st, -1);
-  auto g_age = g_age_field.field("age");
-
-  g_age = 25;
-
-*/
-
 namespace internal {
+
 template<typename _field_t, typename _value_t>
 struct setter
 {
@@ -96,6 +85,12 @@ public:
     _setter_t field(slw::string_t _name)
     {
         return _setter_t {*this, _name, index};
+    }
+
+    template<typename _value_t, typename _setter_t = slw::internal::setter<Field, _value_t>>
+    _setter_t field(slw::string_t _name, _value_t _defaults)
+    {
+        return _setter_t {*this, _name, index, _defaults};
     }
 
     template<typename _value_t>

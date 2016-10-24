@@ -1,4 +1,5 @@
 #include "slw/utility.h"
+#include <string>
 
 void slw::debug::print_stack_contents(slw::State &state, std::ostream &cout)
 {
@@ -9,8 +10,8 @@ void slw::debug::print_stack_contents(slw::State &state, std::ostream &cout)
         int top = -1;
         int type = state.type(top);
 
-        std::cout << "[" << state.type_name(type) << "] ";
-        std::cout << std::to_string(size) << ":";
+        cout << "[" << state.type_name(type) << "] ";
+        cout << std::to_string(size) << ":";
 
         switch(type)
         {
@@ -18,21 +19,21 @@ void slw::debug::print_stack_contents(slw::State &state, std::ostream &cout)
             {
                 slw::number_t _num = 0;
                 state.pop(_num);
-                std::cout << std::to_string(_num) << std::endl;
+                cout << std::to_string(_num) << std::endl;
                 break;
             }
         case slw::TBOOLEAN:
             {
                 bool _bool;
                 state.pop(_bool);
-                std::cout << std::to_string(_bool) << std::endl;
+                cout << std::to_string(_bool) << std::endl;
                 break;
             }
         case slw::TSTRING:
             {
                 slw::string_t _str;
                 state.pop(_str);
-                std::cout << _str << std::endl;
+                cout << _str << std::endl;
                 break;
             }
         default:

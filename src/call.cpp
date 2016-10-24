@@ -21,28 +21,56 @@
 
 #include "slw/call.h"
 #include "slw/state.h"
+#include "slw/types.h"
 
 #include "slw/get_field.h"
 
 #include <lua.hpp>
 
 slw::Call::Call(slw::State &state, slw::string_t fn)
-    : call_ref(slw::get_field(state.state, fn.c_str())
+    : state(state)
+    , call_ref(slw::get_field(state.state, fn.c_str())
                ? luaL_ref(state.state, LUA_REGISTRYINDEX)
                : 0)
-    , args(0)
-    , state(state) {}
+    , isValid(call_ref)
+    , args(0) {}
 
 slw::Call::Call(slw::State &state, int index)
-    : call_ref(0), args(0), state(state), isValid(false)
+    : state(state), call_ref(0), isValid(false), args(0)
 {
     lua_pushvalue(state.state, index);
 
     call_ref = luaL_ref(state.state, LUA_REGISTRYINDEX);
 }
 
+slw::Call::Call(slw::State &state, slw::string_t name, slw::entry_t callback, void *user)
+    : state(state)
+    , call_ref(0)
+    , isValid(false)
+{
+    lua_pushlightuserdata(state.state, this);
+    state.push((int) entries.size());
+
+    lua_pushcclosure(state.state, &handler, 2);
+    lua_setglobal(state.state, name.c_str());
+
+    entry_data_t entry (callback, name, *this, user);
+    entries.push_back(entry);
+
+    if (slw::get_field(state, name.c_str()))
+    {
+        isValid = true;
+        call_ref = luaL_ref(state.state, slw::internal::indexes::registry);
+    }
+}
+
 slw::Call::~Call()
 {
+    for (entry_data_t &entry: entries) {
+        state.push();
+        lua_setglobal(state.state, entry.event.c_str());
+    }
+
     luaL_unref(state.state, LUA_REGISTRYINDEX, call_ref);
 }
 
@@ -89,4 +117,34 @@ bool slw::Call::call(const unsigned int nresults /*= 0*/)
 #endif
 
     return true;
+}
+
+int slw::Call::handler(lua_State *ptr_state)
+{
+    slw::Call &call = *(slw::Call *)lua_touserdata(ptr_state, lua_upvalueindex(1));
+    slw::State &state = call.state;
+    int entry_i = 0;
+
+    state.peek(entry_i, lua_upvalueindex(2));
+
+    slw::Call::entry_data_t &entry = call.entries[entry_i];
+
+    return (*entry.entry)(state, entry.user);
+}
+
+slw::Call::entry_data_t::entry_data_t(const entry_data_t &rhs)
+    : entry(rhs.entry)
+    , event(rhs.event)
+    , call(rhs.call)
+    , user(rhs.user)
+{
+}
+
+slw::Call::entry_data_t::entry_data_t(slw::entry_t entry, slw::string_t event, slw::Call &call, void *user)
+    : entry(entry)
+    , event(event)
+    , call(call)
+    , user(user)
+{
+
 }

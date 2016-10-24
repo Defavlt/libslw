@@ -22,35 +22,58 @@
 #include <lua.hpp>
 
 #include "slw/state.h"
+#include "slw/field.h"
 #include "helpers/push.hpp"
 #include "helpers/peek.hpp"
 #include "helpers/pop.hpp"
+
+const char *const slw::State::magic = "__slw__state__magic";
+
+int slw::State::ref()
+{
+    slw::Field field(*this);
+
+    auto ref_count = field.field<int>(magic, 0);
+    ref_count = ref_count + 1;
+
+    return ref_count;
+}
+
+int slw::State::deref()
+{
+    slw::Field field(*this);
+
+    auto ref_count = field.field<int>(magic, 0);
+    ref_count = ref_count - 1;
+
+    return ref_count;
+}
 
 slw::State::State()
     : state(luaL_newstate())
 {
     luaL_openlibs(state);
 
+    ref();
 }
 
 slw::State::State(slw::State &state)
     : state(state.state)
 {
+    ref();
 }
 
 slw::State::State(lua_State *state)
     : state(state)
 {
+    ref();
 }
 
 slw::State::~State()
 {
-    for (entry_data_t &entry: entries) {
-        push();
-        lua_setglobal(state, entry.event.c_str());
-    }
+    if (!deref())
+        lua_close(state);
 
-    lua_close(state);
     state = NULL;
 }
 
@@ -64,19 +87,6 @@ slw::State::load(const char *str, const bool isFile /* = true */)
         luaL_loadstring(state, str);
 
     return lua_pcall(state, 0, LUA_MULTRET, 0);
-}
-
-void
-slw::State::registerfn(slw::string_t event, slw::entry_t callback, void *user /* = NULL */)
-{
-    lua_pushlightuserdata(state, this);
-    push((int) entries.size());
-
-    lua_pushcclosure(state, &handler, 2);
-    lua_setglobal(state, event.c_str());
-
-    entry_data_t entry (callback, event, *this, user);
-    entries.push_back(entry);
 }
 
 bool slw::State::pop(slw::string_t &value, bool force)
@@ -202,33 +212,4 @@ slw::string_t slw::State::type_name(int type)
 int slw::State::top()
 {
     return lua_gettop(state);
-}
-
-int slw::State::handler(lua_State *ptr_state)
-{
-    slw::State &state = *(slw::State *)lua_touserdata(ptr_state, lua_upvalueindex(1));
-    int entry_i = 0;
-
-    state.peek(entry_i, lua_upvalueindex(2));
-
-    slw::State::entry_data_t &entry = state.entries[entry_i];
-
-    return (*entry.entry)(entry.state, entry.user);
-}
-
-slw::State::entry_data_t::entry_data_t(const entry_data_t &rhs)
-    : entry(rhs.entry)
-    , event(rhs.event)
-    , state(rhs.state)
-    , user(rhs.user)
-{
-}
-
-slw::State::entry_data_t::entry_data_t(slw::entry_t entry, slw::string_t event, slw::State &state, void *user)
-    : entry(entry)
-    , event(event)
-    , state(state)
-    , user(user)
-{
-
 }

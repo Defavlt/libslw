@@ -1,192 +1,211 @@
+/**
+* Copyright (C) 2016- The Authors
+*
+*    This program is free software: you can redistribute it and/or modify
+*    it under the terms of the GNU General Public License as published by
+*    the Free Software Foundation, either version 3 of the License, or
+*    (at your option) any later version.
+*
+*    This program is distributed in the hope that it will be useful,
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*    GNU General Public License for more details.
+*
+*    You should have received a copy of the GNU General Public License
+*    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*	Authors:
+*	Marcus Hansson <marcus.hansson@email.com>
+*	Andre Andersson <andre.eric.andersson@gmail.com>
+**/
+
 #include <lua.hpp>
 
-#include "slw/State.h"
+#include "slw/state.h"
+#include "helpers/push.hpp"
+#include "helpers/peek.hpp"
+#include "helpers/pop.hpp"
 
-SLW::State::State( void )
-	: state( luaL_newstate() )
+slw::State::State()
+    : state(luaL_newstate())
 {
-	luaL_openlibs( state );
+    luaL_openlibs(state);
+
 }
 
-SLW::State::State( lua_State* _state )
-	: state( _state )
+slw::State::State(slw::State &state)
+    : state(state.state)
 {
-
 }
 
-SLW::State::~State( void )
+slw::State::State(lua_State *state)
+    : state(state)
 {
-	lua_close( state );
-	state = NULL;
+}
+
+slw::State::~State()
+{
+    lua_close(state);
+    state = NULL;
 }
 
 bool
-SLW::State::load( const char* str, const bool str_is_file /* = true */ )
+slw::State::load(const char *str, const bool str_is_file /* = true */)
 {
-	if ( str_is_file )
-		luaL_loadfile( state, str );
+    if ( str_is_file )
+        luaL_loadfile( state, str );
 
-	else
-		luaL_loadstring( state, str );
+    else
+        luaL_loadstring( state, str );
 
-	DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
-
-		return lua_pcall( state, 0, LUA_MULTRET, 0 );
-
-	ENABLE_WARNING( "", "", 4800 )
+    return lua_pcall( state, 0, LUA_MULTRET, 0 );
 }
 
 void
-SLW::State::registerfn( const char* event, SLW::Entry callback, void* user /* = NULL */ )
+slw::State::registerfn( const char *event, slw::entry_t callback, void *user /* = NULL */ )
 {
-	SLW::State::EntryPoint* point = new SLW::State::EntryPoint;
+    slw::State::entry_data_t *point = new slw::State::entry_data_t;
 
-	point->entry = callback;
-	point->event = event;
-	point->state = this;
-	point->user	 = user;
+    point->entry = callback;
+    point->event = event;
+    point->state = this;
+    point->user	 = user;
 
-	lua_pushnumber( state, ( size_t )( point ) );
-	lua_pushcclosure( state, &handler, 1 );
-	lua_setglobal( state, event );
+    lua_pushlightuserdata(state, point);
+    lua_pushcclosure(state, &handler, 1);
+    lua_setglobal(state, event);
 }
 
-bool
-SLW::State::pop( const char*& v, int offset /* = 0 */, const bool force /* = false */ )
+bool slw::State::pop(slw::string_t &value, bool force)
 {
-	const int index = top() + offset;
-	const int _top	= lua_gettop( state );
-
-	if ( _top == 0 || !lua_isstring( state, index ) )
-	{
-		if ( force )
-			lua_pop( state, 1 );
-
-		return false;
-	}
-
-	else
-	{
-		v = lua_tostring( state, index );
-		v = SLW::strdcpy( v, 0, strlen( v ) );
-
-		lua_pop( state, 1 );
-
-		return true;
-	}
+    return slw::pop(state, value, force);
 }
 
-bool
-SLW::State::pop( bool& v, int offset /* = 0 */, const bool force /* = false */ )
+bool slw::State::pop(number_t &value, bool force)
 {
-	const int index = top() + offset;
-	const int _top	= lua_gettop( state );
-
-	if ( _top == 0 || !lua_isboolean( state, index ) )
-	{
-		if ( force )
-			lua_pop( state, 1 );
-
-		return false;
-	}
-
-	else
-	{
-
-		DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
-
-			v = lua_toboolean( state, index );
-		lua_pop( state, 1 );
-		ENABLE_WARNING( "", "", 4800 )
-
-			return true;
-	}
+    return slw::pop(state, value, force);
 }
 
-bool
-SLW::State::pop( int offset /* = 0 */ )
+bool slw::State::pop(long &value, bool force)
 {
-	const int _top	= lua_gettop( state ) + offset;
-
-	if ( _top == 0 )
-		return false;
-
-	else
-	{
-		lua_pop( state, 1 );
-		return true;
-	}
+    return slw::pop(state, value, force);
 }
 
-bool
-SLW::State::peek( const char*& v, int offset /* = 0 */ )
+bool slw::State::pop(int &value, bool force)
 {
-	const int index = top() + offset;
-	const int _top	= lua_gettop( state );
-
-	if ( _top == 0 || !lua_isstring( state, index ) )
-		return false;
-
-	else
-	{
-		v = lua_tostring( state, index );
-		v = SLW::strdcpy( v, 0, strlen( v ) );
-
-		return true;
-	}
+    return slw::pop(state, value, force);
 }
 
-bool
-SLW::State::peek( bool& v, int offset /* = 0 */ )
+bool slw::State::pop(char &value, bool force)
 {
-	const int index = top() + offset;
-	const int _top	= lua_gettop( state );
-
-	if ( _top == 0 || !lua_isboolean( state, index ) )
-		return false;
-
-	else
-	{
-		DISABLE_WARNING( "", "", 4800 ) //performance warning: forcing value to bool
-		v = lua_toboolean( state, index );
-		ENABLE_WARNING( "", "", 4800 )
-
-		return true;
-	}
+    return slw::pop(state, value, force);
 }
 
-void
-SLW::State::push( const char* v )
+bool slw::State::pop(bool &value, bool force)
 {
-	lua_pushstring( state, v );
+    return slw::pop(state, value, force);
 }
 
-void
-SLW::State::push( const bool v )
+bool slw::State::pop()
 {
-	lua_pushboolean( state, v );
+    return slw::pop(state);
 }
 
-void
-SLW::State::setglobal( const char* field )
+bool slw::State::peek(slw::string_t &value, int offset)
 {
-	lua_setglobal( state, field );
+    return slw::peek(state, value, offset);
 }
 
-void
-SLW::State::dostring( const char* str )
+bool slw::State::peek(number_t &value, int offset)
 {
-	luaL_dostring( state, str );
+    return slw::peek(state, value, offset);
 }
 
-int
-SLW::State::size( void )
+bool slw::State::peek(long &value, int offset)
 {
-	return lua_gettop( state );
+    return slw::peek(state, value, offset);
 }
 
-int
-SLW::State::type( int index /* = -1 */ )
+bool slw::State::peek(int &value, int offset)
 {
-	return lua_type( state, index );
+    return slw::peek(state, value, offset);
+}
+
+bool slw::State::peek(char &value, int offset)
+{
+    return slw::peek(state, value, offset);
+}
+
+bool slw::State::peek(bool &value, int offset)
+{
+    return slw::peek(state, value, offset);
+}
+
+void slw::State::push(slw::string_t value)
+{
+    slw::push(state, value);
+}
+
+void slw::State::push(number_t value)
+{
+    slw::push(state, value);
+}
+
+void slw::State::push(long value)
+{
+    slw::push(state, value);
+}
+
+void slw::State::push(int value)
+{
+    slw::push(state, value);
+}
+
+void slw::State::push(char value)
+{
+    slw::push(state, value);
+}
+
+void slw::State::push(bool value)
+{
+    slw::push(state, value);
+}
+
+void slw::State::push()
+{
+    slw::push(state);
+}
+
+void slw::State::dostring(slw::string_t str)
+{
+    luaL_dostring(state, str.c_str());
+}
+
+int slw::State::size()
+{
+    return lua_gettop(state);
+}
+
+int slw::State::type(int index/* = -1 */)
+{
+    return lua_type(state, index);
+}
+
+slw::string_t slw::State::type_name(int type)
+{
+    return lua_typename(state, type);
+}
+
+int slw::State::top()
+{
+    return lua_gettop(state);
+}
+
+int slw::State::handler(lua_State *state)
+{
+    slw::State::entry_data_t *point =
+        (slw::State::entry_data_t *)
+        (lua_touserdata(state, lua_upvalueindex(1)));
+
+    return (*point->entry)(*point->state, point->user);
 }

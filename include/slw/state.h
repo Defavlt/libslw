@@ -1,5 +1,5 @@
 /**
-* Copyright © The Authors
+* Copyright (C) 2016- The Authors
 *
 *    This program is free software: you can redistribute it and/or modify
 *    it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 *
 *	Authors:
 *	Marcus Hansson <marcus.hansson@email.com>
-*	André Andersson <andre.eric.andersson@gmail.com>
+*	Andre Andersson <andre.eric.andersson@gmail.com>
 **/
 
 #ifndef SLW_STATE_H
@@ -25,218 +25,120 @@
 #include <exception>
 
 #include "slw/types.h"
-#include "slw/warnings.h"
-#include "slw/cstrings.h"
 #include "slw/stdout.h"
 
-#define _LUA_ENTRY_OUT int
-#define _LUA_ENTRY_IN ( SLW::State& state, void* user )
+struct lua_State;
 
-#define __LUA_ENTRY( NAME ) _LUA_ENTRY_OUT NAME _LUA_ENTRY_IN
+namespace slw {
 
-namespace SLW
+class Call;
+class Field;
+class State;
+
+typedef int (* entry_t) (slw::State &, void *);
+
+class State
 {
-	class State;
-
-	typedef _LUA_ENTRY_OUT ( *Entry ) _LUA_ENTRY_IN;
-
-    class State
-    {
 public:
-        friend class Call;
-		friend class Table;
+    friend class slw::Call;
+    friend class slw::Field;
 
-        State( void );
+    State();
 
-		State( State& _state )
-			: state( NULL )
-		{
-			state = _state.state;
-		}
+    State(State &);
+    State(lua_State *);
 
-		State( lua_State* _state );
+    ~State();
 
-        virtual ~State( void );
+    bool
+    load(const char *str, const bool str_is_file = true);
 
-        bool
-        load( const char* str, const bool str_is_file = true );
+    void registerfn(const char *event, slw::entry_t, void *user = NULL);
 
-		void
-		registerfn( const char* event, SLW::Entry callback, void* user = NULL );
-		
-		/* \brief Pop a value from the stack, optionally at an offset 
-		 * \return true if the stack isn't empty and there's an actual
-		 *     value
-		 *     
-		 * \param v the pop'd value
-		 * \note remember to free the value if it's a string
-		 */
-		bool
-        pop( const char*& v, int offset = 0, const bool force = false );
+    template<typename _value_t>
+    _value_t pop(_value_t _defaults)
+    {
+        pop(_defaults);
+        return _defaults;
+    }
 
-        bool
-        pop( bool& v, int offset = 0, const bool force = false );
+    /* \brief Pop a value from the stack
+     * \return true if the stack isn't empty and there's an actual
+     *     value
+     *
+     * \param the pop'd value
+     * \param force will force a pop if true
+     */
+    bool pop(slw::string_t &, bool force = false);
+    bool pop(number_t &, bool force = false);
+    bool pop(long &, bool force = false);
+    bool pop(int &, bool force = false);
+    bool pop(char &, bool force = false);
+    bool pop(bool &, bool force = false);
 
-		bool
-		pop( int offset = 0 );
+    /* \brief Pop the value at the top of the stack
+     */
+    bool pop();
 
-        template< typename NumT >
-        bool
-        pop( NumT& v, int offset = 0, const bool force = false )
-		{
-			const int index = top() + offset;
-			const int _top	= lua_gettop( state );
+    template<typename _value_t>
+    _value_t peek(_value_t _defaults)
+    {
+        peek(_defaults);
+        return _defaults;
+    }
 
-            if ( _top == 0 || !lua_isnumber( state, index ) )
-			{
-				if ( force )
-					lua_pop( state, 1 );
+    /* \brief Peek at the stack - optionally from an offset
+     * \return true if the stack isn't empty and there's an actual
+     *     value
+     *
+     * \param v the value in the stack
+     **/
+    bool peek(slw::string_t &, int offset = -1);
+    bool peek(number_t &, int offset = -1);
+    bool peek(long &, int offset = -1);
+    bool peek(int &, int offset = -1);
+    bool peek(char &, int offset = -1);
+    bool peek(bool &, int offset = -1);
 
-				return false;
-			}
+    /* \brief push a value to the top of the stack
+     **/
+    void push(slw::string_t);
+    void push(number_t);
+    void push(long);
+    void push(int);
+    void push(char);
+    void push(bool);
 
-            else
-            {
-                v = ( NumT )lua_tonumber( state, index );
-                lua_pop( state, 1 );
+    /* \brief push a nil value to the top of the stack
+     **/
+    void push();
 
-                return true;
-            }
-        }
+    void dostring(slw::string_t);
+    void dofile(slw::string_t);
 
-		template< typename VecT, unsigned int length >
-		bool
-		pop( VecT& v, int offset = 0 )
-		{
-			int _top	= lua_gettop( state );
+    /* \brief the current size of the stack
+     **/
+    int size();
 
-			bool success = true;
+    int type(int index = -1);
+    slw::string_t type_name(int);
+    int top();
 
-			int state_i = _top + offset;
-			int vec_i	= length;
+    lua_State *state;
 
-			for ( ; success 
-				&& _top > 0 
-				&& ( success = lua_isnumber( state, state_i ) );
-				--vec_i, --state_i, _top = lua_gettop( state ) )
-			{
-				v[ vec_i ] = ( float )lua_tonumber( state, state_i );
-				lua_pop( state, state_i );
-			}
+private:
 
-			return success;
-		}
+    static int handler( lua_State *state );
 
-		/* \brief Peek at the stack - optionally from an offset
-		 * \return true if the stack isn't empty and there's an actual
-		 *     value
-		 *
-		 * \param v the value in the stack
-		 **/
-		bool
-		peek( const char*& v, int offset = 0 );
-
-		bool
-		peek( bool& v, int offset = 0 );
-
-		template< typename NumT >
-		bool
-		peek( NumT& v, int offset = 0 )
-		{
-			const int index = top() + offset;
-			const int _top	= lua_gettop( state );
-
-			if ( _top == 0 || !lua_isnumber( state, index ) )
-				return false;
-
-			else
-			{
-				v = ( NumT )lua_tonumber( state, index );
-
-				return true;
-			}
-		}
-
-DISABLE_WARNING( "", "", 4706 ) //assignment within conditional expression
-
-		template< typename VecT, unsigned int length >
-		bool
-		peek( VecT& v, int offset = 0 )
-		{
-			int _top	= lua_gettop( state );
-
-			bool success = true;
-
-			int state_i = -1 - offset;
-			int vec_i	= length - 1;
-
-			for ( ; success 
-				&& _top > 0 
-				&& state_i > -_top 
-				&& ( success = success && lua_isnumber( state, state_i ) );
-			
-				--vec_i, --state_i )
-				{
-					v[ vec_i ] = ( float )lua_tonumber( state, state_i );
-				}
-
-			return success;
-		}
-
-ENABLE_WARNING( "", "", 4706 )
-
-		void
-		push( const char* v );
-
-		void
-		push( const bool v );
-
-		template< typename NumT >
-		void
-		push( const NumT v )
-		{
-			lua_pushnumber( state, v );
-		}
-
-		void
-		setglobal( const char* field );
-
-		void
-		dostring( const char* str );
-
-		/* \brief the current size of the stack
-		 **/
-		int
-		size( void );
-
-		int
-		type( int index = -1 );
-
-	protected:
-
-		virtual int
-		top( void )
-		{
-			return -1;
-		}
-
-    private:
-
-		static int
-		handler( lua_State* state );
-
-		struct EntryPoint
-		{
-			SLW::Entry	entry;
-			const char* event;
-			SLW::State* state;
-			void*		user;
-		};
-
-        lua_State* state;
-
-		static int handlers;
+    struct entry_data_t {
+        slw::entry_t	entry;
+        const char *event;
+        slw::State *state;
+        void		*user;
     };
-}
+
+    static int handlers;
+};
+} //namespace slw
 
 #endif // SLW_STATE_H

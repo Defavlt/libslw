@@ -1,175 +1,147 @@
+/**
+* Copyright (C) 2016- The Authors
+*
+*    This program is free software: you can redistribute it and/or modify
+*    it under the terms of the GNU General Public License as published by
+*    the Free Software Foundation, either version 3 of the License, or
+*    (at your option) any later version.
+*
+*    This program is distributed in the hope that it will be useful,
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*    GNU General Public License for more details.
+*
+*    You should have received a copy of the GNU General Public License
+*    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*	Authors:
+*	Marcus Hansson <marcus.hansson@email.com>
+*	Andre Andersson <andre.eric.andersson@gmail.com>
+**/
+
 #ifndef SLW_TABLE_H
 #define SLW_TABLE_H
 
-namespace SLW
+#include "slw/get_field.h"
+#include "slw/state.h"
+#include "slw/types.h"
+
+namespace slw {
+
+/* Usage:
+
+  State st;
+
+  Field g_age_field(st, -1);
+  auto g_age = g_age_field.field("age");
+
+  g_age = 25;
+
+*/
+
+namespace internal {
+template<typename _field_t, typename _value_t>
+struct setter
 {
-	class State;
+    typedef _field_t field_t;
+    typedef _value_t value_t;
 
-	/* \brief Create or modify a table
-	 *
-	 **/
-	class Table
-	{
-	public:
+    field_t &field;
+    slw::string_t name;
+    int index;
+    value_t value;
 
-		Table( SLW::State& state, const int index = -1 );
+    inline field_t &operator =(value_t _value)
+    {
+        value = _value;
+        field = *this;
+        return field;
+    }
 
-		/* \brief allocate space for and create a new table
-		 * \param narr number of array elements
-		 * \param nrec number of non-array elements
-		 *
-		 **/
-		SLW::Table&
-		Allocate( const int narr, const int nrec );
+    inline operator value_t()
+    {
+        field.get(name, value);
+        return value;
+    }
 
-		bool
-		Find( const char* field, bool& result );
-
-		/* \brief Set table element this[field] = v
-		 **/
-		template< typename VecT, unsigned int length >
-		SLW::Table&
-		Set( const VecT v )
-		{
-			for ( unsigned int i = 0; i < length; ++i )
-			{
-				state.push( v[ i ] );
-
-				// remember: lua array fields start 1
-				lua_rawseti( state.state, index - 1, i + 1 );
-			}
-
-			return *this;
-		}
-
-		template< typename TypeT >
-		SLW::Table&
-		Set( const char* field, TypeT& v)
-		{
-			state.push( v );
-			lua_setfield( state.state, index, field );
-
-			return *this;
-		}
-
-		/* \brief Get table element this[field]
-		 * \note remember to free v if it's a string
-		 **/
-		template< typename VecT, unsigned int length >
-		SLW::Table&
-		Get( const char* field, VecT& v )
-		{
-			lua_getfield( state.state, index, field );
-
-			int type = lua_type( state.state, index );
-
-			if ( type == LUA_TTABLE )
-			{
-				lua_pushnil( state.state );
-
-				int i = 0;
-
-				/*
-				* stack:
-				*   1 nil
-				*   2 table
-				*/
-
-				for ( ; /*i < length && */lua_next( state.state, index - 1 ); ++i )
-				{
-					/*
-					* stack:
-					*   1 value
-					*   2 key
-					*   3 table
-					*/
-
-					state.pop( v[ i ] );
-
-					/*
-					* stack:
-					*   1 key
-					*   2 table
-					*/
-				}
-			}
-
-			lua_pop( state.state, 1 );
-
-			return *this;
-		}
-
-		template< typename TypeT >
-		SLW::Table&
-		Get( const char* field, TypeT& v )
-		{
-			lua_getfield( state.state, index, field );
-			state.pop( v, 0, true );
-
-			return *this;
-		}
-
-		template< typename VecT, unsigned int length >
-		SLW::Table&
-		Get( int field, VecT& v )
-		{
-			lua_rawgeti( state.state, index, field );
-
-			int type = lua_type( state.state, index );
-
-			if ( type == LUA_TTABLE )
-			{
-				lua_pushnil( state.state );
-
-				int i = 0;
-
-				/*
-				* stack:
-				*   1 nil
-				*   2 table
-				*/
-
-				for ( ; lua_next( state.state, index - 1 ); ++i )
-				{
-					/*
-					* stack:
-					*   1 value
-					*   2 key
-					*   3 table
-					*/
-
-					state.pop( v[ i ] );
-
-					/*
-					* stack:
-					*   1 key
-					*   2 table
-					*/
-				}
-			}
-
-			lua_pop( state.state, 1 );
-
-			return *this;
-		}
-
-		template< typename TypeT >
-		SLW::Table&
-		Get( int field, TypeT& v )
-		{
-			lua_rawgeti( state.state, index, field );
-			state.pop( v, 0, true );
-
-			return *this;
-		}
-
-	private:
-		const SLW::Table& operator=( const SLW::Table& );
-
-		const int index;
-
-		SLW::State& state;
-	};
+//private:
+//    Setter();
+};
 }
+
+/* \brief Create or modify a field
+ *
+ * \usage
+ *   State st;
+ *   Field field(st);
+ *   auto age = field.field<int>("age");
+ *   age = 25;
+ **/
+class Field
+{
+    friend class slw::internal::setter<slw::Field, slw::string_t>;
+    friend class slw::internal::setter<slw::Field, slw::number_t>;
+    friend class slw::internal::setter<slw::Field, long>;
+    friend class slw::internal::setter<slw::Field, int>;
+    friend class slw::internal::setter<slw::Field, char>;
+    friend class slw::internal::setter<slw::Field, bool>;
+
+public:
+
+    Field(slw::State &state);
+
+    void table(int narr = 0, int nrec = 0);
+
+    template<typename _value_t, typename _setter_t = slw::internal::setter<Field, _value_t>>
+    _setter_t field(slw::string_t _name)
+    {
+        return _setter_t {*this, _name, index};
+    }
+
+    template<typename _value_t>
+    Field &operator =(slw::internal::setter<Field, _value_t> &rhs)
+    {
+        set(rhs.name, rhs.index, rhs.value);
+        return *this;
+    }
+
+    template<typename _value_t>
+    inline _value_t get(slw::string_t name, _value_t defaults)
+    {
+        get(name, defaults);
+        return defaults;
+    }
+
+    bool get(slw::string_t &name, slw::string_t &);
+    bool get(slw::string_t &name, slw::number_t &);
+    bool get(slw::string_t &name, long &);
+    bool get(slw::string_t &name, int &);
+    bool get(slw::string_t &name, char &);
+    bool get(slw::string_t &name, bool &);
+
+    operator slw::string_t();
+    operator slw::number_t();
+    operator long();
+    operator int();
+    operator char();
+    operator bool();
+
+private:
+    void set(slw::string_t &name, int index, slw::string_t);
+    void set(slw::string_t &name, int index, slw::number_t);
+    void set(slw::string_t &name, int index, long);
+    void set(slw::string_t &name, int index, int);
+    void set(slw::string_t &name, int index, char);
+    void set(slw::string_t &name, int index, bool);
+
+    slw::State &state;
+    slw::string_t name;
+
+    /* the current index, defaulted to slw::internal::indexes::globals
+     * */
+    int index;
+};
+
+} //namespace slw
 
 #endif//SLW_TABLE_H

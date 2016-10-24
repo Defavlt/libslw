@@ -1,17 +1,24 @@
-#include "slw/State.h"
+/**
+* Copyright (C) 2016- The Authors
+*
+*    This program is free software: you can redistribute it and/or modify
+*    it under the terms of the GNU General Public License as published by
+*    the Free Software Foundation, either version 3 of the License, or
+*    (at your option) any later version.
+*
+*    This program is distributed in the hope that it will be useful,
+*    but WITHOUT ANY WARRANTY; without even the implied warranty of
+*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*    GNU General Public License for more details.
+*
+*    You should have received a copy of the GNU General Public License
+*    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*	Authors:
+*	Marcus Hansson <marcus.hansson@email.com>
+*	Andre Andersson <andre.eric.andersson@gmail.com>
+**/
 
-int
-SLW::State::handlers = 0;
+#include "slw/state.h"
 
-int
-SLW::State::handler( lua_State* state )
-{
-	SLW::State::EntryPoint* point = NULL;
 
-	point = 
-		( SLW::State::EntryPoint* ) 
-		( size_t )
-		( lua_tonumber( state, lua_upvalueindex( 1 ) ) );
-
-	return ( *point->entry )( *point->state, point->user );
-}

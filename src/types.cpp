@@ -19,22 +19,9 @@
 *	Andre Andersson <andre.eric.andersson@gmail.com>
 **/
 
-#ifndef SLW_GET_FIELD_H
-#define SLW_GET_FIELD_H
-
-#include "slw/state.h"
 #include "slw/types.h"
+#include <lua.hpp>
 
-struct lua_State;
-
-
-namespace slw
-{
-/* \brief get a field or object from a Lua state
- * \return true if object or function was found
- */
-bool get_field(lua_State *state, slw::string_t);
-bool get_field(slw::State &, slw::string_t);
-}
-
-#endif//SLW_GET_FIELD_H
+const int slw::internal::indexes::globals(LUA_GLOBALSINDEX);
+const int slw::internal::indexes::registry(LUA_REGISTRYINDEX);
+const int slw::internal::indexes::environ(LUA_ENVIRONINDEX);

@@ -32,7 +32,7 @@ namespace slw
     typedef std::string string_t;
     typedef std::size_t size_t;
 
-	enum Types
+    enum type_e
     {
         TNONE = -1, //LUA_TNONE
         TNIL = 0, //LUA_TNIL

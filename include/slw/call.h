@@ -58,9 +58,14 @@ public:
     void param(bool);
 
     /* \brief increment the number of pushed parameters
-     * \note useful if you push values onto the stack manually
+     * \note useful if you push values onto the stack
      */
     void param();
+
+    /* \brief set manually the number of parameters on the stack
+     * \note useful if you push values onto the stack
+     */
+    void set_param(int);
 
     /* \brief pop all arguments from the stack and call the
      * initially supplied function.

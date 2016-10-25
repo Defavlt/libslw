@@ -3,12 +3,12 @@
 
 void slw::debug::print_stack_contents(slw::State &state, std::ostream &cout)
 {
-    int size = state.top();
+    int size = -state.top();
 
-    for (; size > 0; --size)
+    for (; size; ++size)
     {
-        int top = -1;
-        int type = state.type(top);
+        int index = size;
+        int type = state.type(index);
 
         cout << "[" << state.type_name(type) << "] ";
         cout << std::to_string(size) << ":";
@@ -18,26 +18,26 @@ void slw::debug::print_stack_contents(slw::State &state, std::ostream &cout)
         case slw::TNUMBER:
             {
                 slw::number_t _num = 0;
-                state.pop(_num);
+                state.peek(_num, index);
                 cout << std::to_string(_num) << std::endl;
                 break;
             }
         case slw::TBOOLEAN:
             {
                 bool _bool;
-                state.pop(_bool);
+                state.peek(_bool, index);
                 cout << std::to_string(_bool) << std::endl;
                 break;
             }
+
+        default:
         case slw::TSTRING:
             {
                 slw::string_t _str;
-                state.pop(_str);
+                state.peek(_str, index);
                 cout << _str << std::endl;
                 break;
             }
-        default:
-            break;
         }
     }
 }

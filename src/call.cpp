@@ -24,29 +24,25 @@
 #include "slw/types.h"
 
 #include "slw/get_field.h"
+#include "slw/utility.h"
 
 #include <lua.hpp>
 
 slw::Call::Call(slw::State &state, slw::string_t fn)
     : state(state)
     , call_ref(slw::get_field(state.state, fn.c_str())
-               ? luaL_ref(state.state, LUA_REGISTRYINDEX)
+               ? luaL_ref(state.state, slw::internal::indexes::registry)
                : 0)
     , isValid(call_ref)
-    , args(0) {}
-
-slw::Call::Call(slw::State &state, int index)
-    : state(state), call_ref(0), isValid(false), args(0)
+    , args(0)
 {
-    lua_pushvalue(state.state, index);
-
-    call_ref = luaL_ref(state.state, LUA_REGISTRYINDEX);
 }
 
 slw::Call::Call(slw::State &state, slw::string_t name, slw::entry_t callback, void *user)
     : state(state)
     , call_ref(0)
     , isValid(false)
+    , args(0)
 {
     lua_pushlightuserdata(state.state, this);
     state.push((int) entries.size());
@@ -79,6 +75,22 @@ void slw::Call::clear(void)
     lua_pop(state.state, args);
     args = 0;
 }
+
+
+#define PARAM(TYPE)\
+void slw::Call::param(TYPE value) {\
+    state.push(value);\
+    ++args;\
+}
+
+PARAM(slw::string_t)
+PARAM(slw::number_t)
+PARAM(long)
+PARAM(int)
+PARAM(char)
+PARAM(bool)
+
+#undef PARAM
 
 void slw::Call::param()
 {
@@ -121,11 +133,12 @@ bool slw::Call::call(const unsigned int nresults /*= 0*/)
 
 int slw::Call::handler(lua_State *ptr_state)
 {
+    slw::State state(ptr_state);
     slw::Call &call = *(slw::Call *)lua_touserdata(ptr_state, lua_upvalueindex(1));
-    slw::State &state = call.state;
     int entry_i = 0;
 
-    state.peek(entry_i, lua_upvalueindex(2));
+    if (!state.peek(entry_i, slw::internal::indexes::upvalue(2)))
+        return 0;
 
     slw::Call::entry_data_t &entry = call.entries[entry_i];
 

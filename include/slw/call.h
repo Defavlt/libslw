@@ -41,11 +41,6 @@ public:
      */
     Call(slw::State &, slw::string_t event, slw::entry_t, void * = nullptr);
 
-    /* \brief construct a new SLW::Call by
-     *   using the supplied index
-     */
-    Call(slw::State &state, int);
-
     ~Call();
 
     /* \brief reset the parameter count of this call
@@ -53,17 +48,17 @@ public:
      */
     void clear();
 
-    /* \brief push a number unto the stack
+    /* \brief push a parameter onto the stack
      */
-    template<typename _value_t>
-    void param( const _value_t v )
-    {
-        state.push(v);
-        ++args;
-    }
+    void param(slw::string_t);
+    void param(slw::number_t);
+    void param(long);
+    void param(int);
+    void param(char);
+    void param(bool);
 
     /* \brief increment the number of pushed parameters
-     * \note useful if you push values unto the stack manually
+     * \note useful if you push values onto the stack manually
      */
     void param();
 

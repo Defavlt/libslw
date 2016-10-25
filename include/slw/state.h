@@ -47,6 +47,9 @@ private:
     int deref();
 
 public:
+
+    int refs();
+
     friend class slw::Call;
     friend class slw::Field;
 
@@ -80,6 +83,13 @@ public:
     bool pop(int &, bool force = false);
     bool pop(char &, bool force = false);
     bool pop(bool &, bool force = false);
+
+    bool remove(slw::string_t &, int offset);
+    bool remove(slw::number_t &, int offset);
+    bool remove(long &, int offset);
+    bool remove(int &, int offset);
+    bool remove(char &, int offset);
+    bool remove(bool &, int offset);
 
     /* \brief Pop the value at the top of the stack
      */

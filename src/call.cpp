@@ -98,6 +98,11 @@ void slw::Call::param()
     ++args;
 }
 
+void slw::Call::set_param(int n)
+{
+    args = n;
+}
+
 bool slw::Call::call(const unsigned int nresults /*= 0*/)
 {
     if (call_ref == 0)
@@ -108,7 +113,7 @@ bool slw::Call::call(const unsigned int nresults /*= 0*/)
 #endif
         const int fn_index = -((int)(args)) - 1;
 
-        if (state.type(fn_index) != LUA_TFUNCTION) {
+        if (!lua_equal(state.state, fn_index, call_ref)) {
             lua_rawgeti(state.state, LUA_REGISTRYINDEX, call_ref);
             lua_insert(state.state, fn_index);
         }

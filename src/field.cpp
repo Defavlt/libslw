@@ -40,46 +40,46 @@ void slw::Field::table(int narr, int nrec)
     index = -1;
 }
 
-bool slw::Field::get(slw::string_t &name, slw::string_t &value)
+bool slw::Field::get(slw::string_t &name, slw::string_t &value, bool force)
 {
     return
         slw::get_field(state.state, name)
-        && state.pop(value);
+        && state.pop(value, force);
 }
 
-bool slw::Field::get(slw::string_t &name, slw::number_t &value)
+bool slw::Field::get(slw::string_t &name, slw::number_t &value, bool force)
 {
     return
         slw::get_field(state.state, name)
-        && state.pop(value);
+        && state.pop(value, force);
 }
 
-bool slw::Field::get(slw::string_t &name, long &value)
+bool slw::Field::get(slw::string_t &name, long &value, bool force)
 {
     return
         slw::get_field(state.state, name)
-        && state.pop(value);
+        && state.pop(value, force);
 }
 
-bool slw::Field::get(slw::string_t &name, int &value)
+bool slw::Field::get(slw::string_t &name, int &value, bool force)
 {
     return
         slw::get_field(state.state, name)
-        && state.pop(value);
+        && state.pop(value, force);
 }
 
-bool slw::Field::get(slw::string_t &name, char &value)
+bool slw::Field::get(slw::string_t &name, char &value, bool force)
 {
     return
         slw::get_field(state.state, name)
-        && state.pop(value);
+        && state.pop(value, force);
 }
 
-bool slw::Field::get(slw::string_t &name, bool &value)
+bool slw::Field::get(slw::string_t &name, bool &value, bool force)
 {
     return
         slw::get_field(state.state, name)
-        && state.pop(value);
+        && state.pop(value, force);
 }
 
 slw::Field::operator slw::string_t()

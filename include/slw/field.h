@@ -49,7 +49,7 @@ struct setter
 
     inline operator value_t()
     {
-        field.get(name, value);
+        field.get(name, value, true);
         return value;
     }
 
@@ -107,12 +107,12 @@ public:
         return defaults;
     }
 
-    bool get(slw::string_t &name, slw::string_t &);
-    bool get(slw::string_t &name, slw::number_t &);
-    bool get(slw::string_t &name, long &);
-    bool get(slw::string_t &name, int &);
-    bool get(slw::string_t &name, char &);
-    bool get(slw::string_t &name, bool &);
+    bool get(slw::string_t &name, slw::string_t &, bool force = false);
+    bool get(slw::string_t &name, slw::number_t &, bool force = false);
+    bool get(slw::string_t &name, long &, bool force = false);
+    bool get(slw::string_t &name, int &, bool force = false);
+    bool get(slw::string_t &name, char &, bool force = false);
+    bool get(slw::string_t &name, bool &, bool force = false);
 
     operator slw::string_t();
     operator slw::number_t();

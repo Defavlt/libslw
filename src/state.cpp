@@ -25,7 +25,6 @@
 #include "slw/field.h"
 #include "helpers/push.hpp"
 #include "helpers/peek.hpp"
-#include "helpers/pop.hpp"
 
 const char *const slw::State::magic = "__slw__state__magic";
 
@@ -45,6 +44,15 @@ int slw::State::deref()
 
     auto ref_count = field.field<int>(magic, 0);
     ref_count = ref_count - 1;
+
+    return ref_count;
+}
+
+int slw::State::refs()
+{
+    slw::Field field(*this);
+
+    auto ref_count = field.field<int>(magic, 0);
 
     return ref_count;
 }
@@ -87,106 +95,6 @@ slw::State::load(const char *str, const bool isFile /* = true */)
         luaL_loadstring(state, str);
 
     return lua_pcall(state, 0, LUA_MULTRET, 0);
-}
-
-bool slw::State::pop(slw::string_t &value, bool force)
-{
-    return slw::pop(state, value, force);
-}
-
-bool slw::State::pop(number_t &value, bool force)
-{
-    return slw::pop(state, value, force);
-}
-
-bool slw::State::pop(long &value, bool force)
-{
-    return slw::pop(state, value, force);
-}
-
-bool slw::State::pop(int &value, bool force)
-{
-    return slw::pop(state, value, force);
-}
-
-bool slw::State::pop(char &value, bool force)
-{
-    return slw::pop(state, value, force);
-}
-
-bool slw::State::pop(bool &value, bool force)
-{
-    return slw::pop(state, value, force);
-}
-
-bool slw::State::pop()
-{
-    return slw::pop(state);
-}
-
-bool slw::State::peek(slw::string_t &value, int offset)
-{
-    return slw::peek(state, value, offset);
-}
-
-bool slw::State::peek(number_t &value, int offset)
-{
-    return slw::peek(state, value, offset);
-}
-
-bool slw::State::peek(long &value, int offset)
-{
-    return slw::peek(state, value, offset);
-}
-
-bool slw::State::peek(int &value, int offset)
-{
-    return slw::peek(state, value, offset);
-}
-
-bool slw::State::peek(char &value, int offset)
-{
-    return slw::peek(state, value, offset);
-}
-
-bool slw::State::peek(bool &value, int offset)
-{
-    return slw::peek(state, value, offset);
-}
-
-void slw::State::push(slw::string_t value)
-{
-    slw::push(state, value);
-}
-
-void slw::State::push(number_t value)
-{
-    slw::push(state, value);
-}
-
-void slw::State::push(long value)
-{
-    slw::push(state, value);
-}
-
-void slw::State::push(int value)
-{
-    slw::push(state, value);
-}
-
-void slw::State::push(char value)
-{
-    slw::push(state, value);
-}
-
-void slw::State::push(bool value)
-{
-    slw::push(state, value);
-}
-
-void slw::State::push()
-{
-    slw::push(state);
 }
 
 void slw::State::dostring(slw::string_t str)

@@ -54,7 +54,7 @@ namespace slw
         extern const int environ;
 
         int upvalue(int offset = 0);
-    };
+    }
     }
 }
 

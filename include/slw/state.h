@@ -36,8 +36,6 @@ class Call;
 class Field;
 class State;
 
-typedef int (* entry_t) (slw::State &, void *);
-
 class State
 {
 private:

@@ -22,6 +22,8 @@
 #ifndef SLW_CALL_H
 #define SLW_CALL_H
 
+#include <functional>
+
 #include "slw/state.h"
 #include "slw/types.h"
 
@@ -30,6 +32,7 @@ namespace slw
 class Call
 {
 public:
+    typedef std::function<int(slw::State &, void *)> entry_t;
 
     /* \brief construct a new SLW::Call by
      *   using the supplied function name
@@ -39,7 +42,7 @@ public:
     /* \brief construct a new callback by
      *   using the supplied function, name, and optional user data
      */
-    Call(slw::State &, slw::string_t event, slw::entry_t, void * = nullptr);
+    Call(slw::State &, slw::string_t event, entry_t, void * = nullptr);
 
     ~Call();
 
@@ -82,9 +85,9 @@ private:
 
     struct entry_data_t {
         entry_data_t(const entry_data_t &);
-        entry_data_t(slw::entry_t, slw::string_t, slw::Call &, void *);
+        entry_data_t(entry_t, slw::string_t, slw::Call &, void *);
 
-        slw::entry_t entry;
+        entry_t entry;
         string_t event;
         slw::Call &call;
         void *user;

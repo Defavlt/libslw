@@ -38,7 +38,7 @@ slw::Call::Call(slw::State &state, slw::string_t fn)
 {
 }
 
-slw::Call::Call(slw::State &state, slw::string_t name, slw::entry_t callback, void *user)
+slw::Call::Call(slw::State &state, slw::string_t name, entry_t callback, void *user)
     : state(state)
     , call_ref(0)
     , isValid(false)
@@ -147,7 +147,7 @@ int slw::Call::handler(lua_State *ptr_state)
 
     slw::Call::entry_data_t &entry = call.entries[entry_i];
 
-    return (*entry.entry)(state, entry.user);
+    return entry.entry(state, entry.user);
 }
 
 slw::Call::entry_data_t::entry_data_t(const entry_data_t &rhs)
@@ -158,7 +158,7 @@ slw::Call::entry_data_t::entry_data_t(const entry_data_t &rhs)
 {
 }
 
-slw::Call::entry_data_t::entry_data_t(slw::entry_t entry, slw::string_t event, slw::Call &call, void *user)
+slw::Call::entry_data_t::entry_data_t(entry_t entry, slw::string_t event, slw::Call &call, void *user)
     : entry(entry)
     , event(event)
     , call(call)

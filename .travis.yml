@@ -10,7 +10,6 @@ sudo: false
 
 before_install:
   - sudo apt-get install -y libluajit-5.1-2
-  - sudo apt-get install -y libluajit-5.1-2-common
   - sudo apt-get install -y libluajit-5.1-2-dev 
 
 env:

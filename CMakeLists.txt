@@ -58,17 +58,51 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   ${LUA_INCLUDE_DIR}
 )
 
-include(GNUInstallDirs)
+option(SLW_ALLOW_INSTALLATION "Generate installation information" ON)
+option(SLW_BUILD_TESTS "Build test suite for libslw" OFF)
 
-install(TARGETS ${PROJECT_NAME}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+if (SLW_BUILD_TESTS)
+	add_executable(${PROJECT_NAME}-ci
+	  src/call.cpp
+	  src/field.cpp
+	  src/get_field.cpp
+	  src/state.cpp
+	  src/types.cpp
+	  src/utility.cpp
+	  src/helpers/tostring.cpp
+	  src/state/peek.cpp
+	  src/state/pop.cpp
+	  src/state/push.cpp
+	  src/state/remove.cpp
+	  src/main.cpp
+	)
 
-# pkg-config
-configure_file(pc.in ${PROJECT_NAME}.pc @ONLY)
+	target_include_directories(${PROJECT_NAME}-ci PRIVATE 
+	  include
+	  src
+	  ${LUA_INCLUDE_DIR}
+	)
 
-install(FILES
-  ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
-)
+	target_link_libraries(${PROJECT_NAME}-ci PRIVATE
+		${PROJECT_NAME}
+	  Threads::Threads
+	  ${LUA_LIBRARIES}
+	)
+endif (SLW_BUILD_TESTS)
+
+if (SLW_ALLOW_INSTALLATION)
+	include(GNUInstallDirs)
+
+	install(TARGETS ${PROJECT_NAME}
+	  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+	)
+
+	# pkg-config
+	configure_file(pc.in ${PROJECT_NAME}.pc @ONLY)
+
+	install(FILES
+	  ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc
+	  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
+	)
+endif (SLW_ALLOW_INSTALLATION)

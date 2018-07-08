@@ -22,19 +22,19 @@ matrix:
 			sources:
 				- ubuntu-toolchain-r-test
 			packages:
-				- g++-4.9
+				- g++-6
 				- libluajit-5.1
 				- libluajit-5.1-common
 				- libluajit-5.1-dev
 	env:
-		- MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+		- MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
 
 env:
   matrix:
     - LUA=luajit2.0
 script:
   - mkdir build && cd build
-  - cmake -D SLW_BUILD_TESTS=ON ..
+  - cmake -DCMAKE_BUILD_TYPE=Release -DSLW_BUILD_TESTS=ON ..
   - make -j4
   - ./slw-ci
 notifications:

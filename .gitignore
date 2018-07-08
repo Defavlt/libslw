@@ -1,6 +1,9 @@
 # Ignore shared libraries
 *.so.*
 
+# Ignore build output directory
+build*/
+
 # Ignore Qt Creator generated files, etc.
 *.config
 *.creator

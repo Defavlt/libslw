@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 2.8.7)
 
 set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 3)
@@ -32,6 +32,14 @@ add_library(${PROJECT_NAME} SHARED
   src/state/pop.cpp
   src/state/push.cpp
   src/state/remove.cpp
+
+  include/slw/call.hpp
+  include/slw/field.hpp
+  include/slw/get_field.hpp
+  include/slw/state.hpp
+  include/slw/stdout.hpp
+  include/slw/types.hpp
+  include/slw/utility.hpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

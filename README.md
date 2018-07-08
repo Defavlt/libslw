@@ -1,4 +1,4 @@
-# Simple Lua Wrapper #
+# Simple Lua Wrapper [![Build Status](https://travis-ci.org/Defavlt/libslw.svg?branch=master)](https://travis-ci.org/Defavlt/libslw) #
 Quality of life when working with the C api of [Lua](https://www.lua.org/).
 
 # Usage

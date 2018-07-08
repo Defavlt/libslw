@@ -1,4 +1,4 @@
-#include "slw/utility.h"
+#include "slw/utility.hpp"
 #include <string>
 
 void slw::debug::print_stack_contents(slw::State &state, std::ostream &cout)

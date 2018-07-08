@@ -19,7 +19,7 @@
 *	Andre Andersson <andre.eric.andersson@gmail.com>
 **/
 
-#include "slw/state.h"
+#include "slw/state.hpp"
 #include "../helpers/remove.hpp"
 
 bool slw::State::remove(slw::string_t &value, int offset)

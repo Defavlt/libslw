@@ -2,7 +2,7 @@
 #define SLW_UTILITY_HPP
 
 #include <iostream>
-#include "slw/state.h"
+#include "slw/state.hpp"
 
 namespace slw {
 namespace debug {

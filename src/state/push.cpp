@@ -19,7 +19,7 @@
 *	Andre Andersson <andre.eric.andersson@gmail.com>
 **/
 
-#include "slw/state.h"
+#include "slw/state.hpp"
 #include "../helpers/push.hpp"
 
 void slw::State::push(slw::string_t value)

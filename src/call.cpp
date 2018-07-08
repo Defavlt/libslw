@@ -19,14 +19,14 @@
 *	Andre Andersson <andre.eric.andersson@gmail.com>
 **/
 
-#include "slw/call.h"
-#include "slw/state.h"
-#include "slw/types.h"
+#include "slw/call.hpp"
+#include "slw/state.hpp"
+#include "slw/types.hpp"
 
-#include "slw/get_field.h"
-#include "slw/utility.h"
+#include "slw/get_field.hpp"
+#include "slw/utility.hpp"
 
-#include <lua.hpp>
+#include "lua.hpp"
 
 slw::Call::Call(slw::State &state, slw::string_t fn)
     : state(state)

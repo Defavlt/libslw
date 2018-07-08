@@ -19,14 +19,14 @@
 *	Andre Andersson <andre.eric.andersson@gmail.com>
 **/
 
-#include "slw/field.h"
-#include "slw/state.h"
+#include "slw/field.hpp"
+#include "slw/state.hpp"
 
-#include "slw/get_field.h"
+#include "slw/get_field.hpp"
 
 #include "helpers/push.hpp"
 #include "helpers/pop.hpp"
-#include <lua.hpp>
+#include "lua.hpp"
 
 slw::Field::Field(slw::State &state)
     : state(state)

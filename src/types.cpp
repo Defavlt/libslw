@@ -19,8 +19,8 @@
 *	Andre Andersson <andre.eric.andersson@gmail.com>
 **/
 
-#include "slw/types.h"
-#include <lua.hpp>
+#include "slw/types.hpp"
+#include "lua.hpp"
 
 const int slw::internal::indexes::globals(LUA_GLOBALSINDEX);
 const int slw::internal::indexes::registry(LUA_REGISTRYINDEX);

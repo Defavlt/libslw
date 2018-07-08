@@ -22,8 +22,8 @@
 #ifndef SLW_GET_FIELD_H
 #define SLW_GET_FIELD_H
 
-#include "slw/state.h"
-#include "slw/types.h"
+#include "slw/state.hpp"
+#include "slw/types.hpp"
 
 struct lua_State;
 

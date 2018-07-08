@@ -25,8 +25,8 @@
 #include <exception>
 #include <vector>
 
-#include "slw/types.h"
-#include "slw/stdout.h"
+#include "slw/types.hpp"
+#include "slw/stdout.hpp"
 
 struct lua_State;
 

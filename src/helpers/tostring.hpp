@@ -22,7 +22,7 @@
 #ifndef SLW_HELPERS_TOSTRING_HPP
 #define SLW_HELPERS_TOSTRING_HPP
 
-#include "slw/types.h"
+#include "slw/types.hpp"
 
 struct lua_State;
 

@@ -22,9 +22,9 @@
 #ifndef SLW_TABLE_H
 #define SLW_TABLE_H
 
-#include "slw/get_field.h"
-#include "slw/state.h"
-#include "slw/types.h"
+#include "slw/get_field.hpp"
+#include "slw/state.hpp"
+#include "slw/types.hpp"
 
 namespace slw {
 namespace internal {

@@ -19,7 +19,7 @@
 *	Andre Andersson <andre.eric.andersson@gmail.com>
 **/
 
-#include "slw/state.h"
+#include "slw/state.hpp"
 #include "../helpers/pop.hpp"
 
 bool slw::State::pop(slw::string_t &value, bool force)

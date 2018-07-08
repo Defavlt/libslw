@@ -24,10 +24,10 @@
 
 #include <exception>
 #include <functional>
-#include <lua.hpp>
+#include "lua.hpp"
 
-#include "slw/state.h"
-#include "slw/types.h"
+#include "slw/state.hpp"
+#include "slw/types.hpp"
 
 namespace slw {
 namespace internal {

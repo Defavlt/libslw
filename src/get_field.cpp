@@ -19,14 +19,14 @@
 *	Andre Andersson <andre.eric.andersson@gmail.com>
 **/
 
-#include <lua.hpp>
+#include "lua.hpp"
 
 #include <cstdlib>
 #include <cstring>
 
-#include "slw/get_field.h"
-#include "slw/types.h"
-#include "slw/stdout.h"
+#include "slw/get_field.hpp"
+#include "slw/types.hpp"
+#include "slw/stdout.hpp"
 
 bool slw::get_field(slw::State &state, slw::string_t field)
 {

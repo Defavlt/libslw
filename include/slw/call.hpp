@@ -24,8 +24,8 @@
 
 #include <functional>
 
-#include "slw/state.h"
-#include "slw/types.h"
+#include "slw/state.hpp"
+#include "slw/types.hpp"
 
 namespace slw
 {

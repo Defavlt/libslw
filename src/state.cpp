@@ -19,10 +19,10 @@
 *	Andre Andersson <andre.eric.andersson@gmail.com>
 **/
 
-#include <lua.hpp>
+#include "lua.hpp"
 
-#include "slw/state.h"
-#include "slw/field.h"
+#include "slw/state.hpp"
+#include "slw/field.hpp"
 #include "helpers/push.hpp"
 #include "helpers/peek.hpp"
 

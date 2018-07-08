@@ -18,7 +18,7 @@ find_package(Threads REQUIRED)
 find_package(LuaJIT 2.0.4 REQUIRED)
 find_package(OpenGL REQUIRED)
 
-configure_file("configure.h.in" "include/configure.h")
+configure_file("configure.h.in" "include/${PROJECT_NAME}/configure.h")
 
 add_library(${PROJECT_NAME} SHARED
   src/call.cpp

@@ -15,7 +15,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/modules/")
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(Threads REQUIRED)
-find_package(LuaJIT 2.0.4 REQUIRED)
+find_package(LuaJIT 2.0.2 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 configure_file("configure.h.in" "include/${PROJECT_NAME}/configure.h")

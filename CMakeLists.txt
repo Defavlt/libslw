@@ -34,6 +34,12 @@ add_library(${PROJECT_NAME} SHARED
   src/state/push.cpp
   src/state/remove.cpp
 
+  src/helpers/peek.hpp
+  src/helpers/pop.hpp
+  src/helpers/push.hpp
+  src/helpers/remove.hpp
+  src/helpers/tostring.hpp
+
   include/slw/call.hpp
   include/slw/field.hpp
   include/slw/get_field.hpp

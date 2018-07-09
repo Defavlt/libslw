@@ -36,8 +36,7 @@ class Call;
 class Field;
 class State;
 
-class State
-{
+class State {
 private:
     static const char *const magic;
 

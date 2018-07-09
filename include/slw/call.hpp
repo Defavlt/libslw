@@ -69,6 +69,16 @@ public:
      */
     void set_param(int);
 
+    /*
+     * \brief Push parameters, and call the function
+     *
+     */
+    template<typename ...args_t>
+    bool operator ()(args_t ...args) {
+        param(args...);
+        return call();
+    }
+
     /* \brief pop all arguments from the stack and call the
      * initially supplied function.
      * \param [optional] nresults number of results to expect

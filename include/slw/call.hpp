@@ -27,10 +27,21 @@
 #include "slw/state.hpp"
 #include "slw/types.hpp"
 
-namespace slw
-{
-class Call
-{
+namespace slw {
+/* \brief Create a reference to a C,
+ *          or Lua defined function
+ *
+ * \usage
+ *      void do_work(State &, void *);
+ *      void *data;
+ *      State st;
+ *      Call c_do_work(st, std::bind(&do_work, ...), data);
+ *      Call l_do_work(st, "do_work");
+ *
+ *      c_do_work();
+ *      l_do_work<int, bool, string>(5, false, "Hello, world!");
+ */
+class Call {
 public:
     typedef std::function<int(slw::State &, void *)> entry_t;
 

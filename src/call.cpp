@@ -53,8 +53,7 @@ slw::Call::Call(slw::State &state, slw::string_t name, entry_t callback, void *u
     entry_data_t entry (callback, name, *this, user);
     entries.push_back(entry);
 
-    if (slw::get_field(state, name.c_str()))
-    {
+    if (slw::get_field(state, name.c_str())) {
         isValid = true;
         call_ref = luaL_ref(state.state, slw::internal::indexes::registry);
     }

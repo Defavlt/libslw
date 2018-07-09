@@ -38,8 +38,7 @@ namespace internal {
         , typename _converter_t = _value_t(lua_State *, int)>
     inline bool pop(lua_State *state, _value_t &value, bool force, _converter_t converter) {
         const int top = lua_gettop(state);
-        const int offset = -1;
-        const int type = lua_type(state, offset);
+        const int type = lua_type(state, -1);
 
         if (!top || type != _type_t) {
             if (force)
@@ -47,7 +46,7 @@ namespace internal {
             return false;
         }
 
-        value = converter(state, offset);
+        value = converter(state, -1);
         lua_pop(state, 1);
         return true;
     }

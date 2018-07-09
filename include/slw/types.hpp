@@ -52,8 +52,8 @@ namespace indexes {
     extern const int environ;
 
     int upvalue(int offset = 0);
-}
-}
-}
+}//ns indexes
+}//ns internal
+}//ns slw
 
 #endif//SLW_TYPES_H

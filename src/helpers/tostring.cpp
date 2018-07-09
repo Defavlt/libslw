@@ -20,7 +20,7 @@
 **/
 
 #include "tostring.hpp"
-#include <lua.hpp>
+#include "lua.hpp"
 
 slw::string_t slw::internal::tostring(lua_State *state, int idx)
 {

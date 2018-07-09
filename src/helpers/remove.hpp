@@ -22,7 +22,7 @@
 #ifndef SLW_HELPERS_REMOVE_HPP
 #define SLW_HELPERS_REMOVE_HPP
 
-#include <lua.hpp>
+#include "lua.hpp"
 
 namespace slw {
 

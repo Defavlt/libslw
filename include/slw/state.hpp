@@ -81,6 +81,11 @@ public:
     bool pop(char &, bool force = false);
     bool pop(bool &, bool force = false);
 
+    /* \brief Pop a value, from the stack, at a particular offset
+     * \return true if the value at the offset is of the correct type
+     * \param the removed value
+     * \param offset, or index, of the value
+     */
     bool remove(slw::string_t &, int offset);
     bool remove(slw::number_t &, int offset);
     bool remove(long &, int offset);

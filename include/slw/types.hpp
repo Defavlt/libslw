@@ -25,36 +25,35 @@
 #include <string>
 #include <cstdlib>
 
-namespace slw
+namespace slw {
+typedef double number_t;
+typedef std::string string_t;
+typedef std::size_t size_t;
+
+enum type_e
 {
-    typedef double number_t;
-    typedef std::string string_t;
-    typedef std::size_t size_t;
+    TNONE = -1, //LUA_TNONE
+    TNIL = 0, //LUA_TNIL
+    TBOOLEAN = 1, //LUA_TBOOLEAN
+    TLIGHTUSERDATA = 2, //LUA_TLIGHTUSERDATA
+    TNUMBER = 3, //LUA_TNUMBER
+    TSTRING = 4, //LUA_TSTRING
+    TTABLE = 5, //LUA_TTABLE
+    TFUNCTION = 6, //LUA_TFUNCTION
+    TUSERDATA = 7, //LUA_TUSERDATA
+    TTHREAD = 8, //LUA_TTHREAD
+    NUMTYPES = TTHREAD + 2
+};
 
-    enum type_e
-    {
-        TNONE = -1, //LUA_TNONE
-        TNIL = 0, //LUA_TNIL
-        TBOOLEAN = 1, //LUA_TBOOLEAN
-        TLIGHTUSERDATA = 2, //LUA_TLIGHTUSERDATA
-        TNUMBER = 3, //LUA_TNUMBER
-        TSTRING = 4, //LUA_TSTRING
-        TTABLE = 5, //LUA_TTABLE
-        TFUNCTION = 6, //LUA_TFUNCTION
-        TUSERDATA = 7, //LUA_TUSERDATA
-        TTHREAD = 8, //LUA_TTHREAD
-        NUMTYPES = TTHREAD + 2
-	};
+namespace internal {
+namespace indexes {
+    extern const int globals;
+    extern const int registry;
+    extern const int environ;
 
-    namespace internal {
-    namespace indexes {
-        extern const int globals;
-        extern const int registry;
-        extern const int environ;
-
-        int upvalue(int offset = 0);
-    }
-    }
+    int upvalue(int offset = 0);
+}
+}
 }
 
 #endif//SLW_TYPES_H

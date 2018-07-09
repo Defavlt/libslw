@@ -30,8 +30,7 @@ namespace slw {
 namespace internal {
 
 template<typename _field_t, typename _value_t>
-struct setter
-{
+struct setter {
     typedef _field_t field_t;
     typedef _value_t value_t;
 
@@ -66,8 +65,7 @@ struct setter
  *   auto age = field.field<int>("age");
  *   age = 25;
  **/
-class Field
-{
+class Field {
     friend class slw::internal::setter<slw::Field, slw::string_t>;
     friend class slw::internal::setter<slw::Field, slw::number_t>;
     friend class slw::internal::setter<slw::Field, long>;

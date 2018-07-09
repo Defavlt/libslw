@@ -47,7 +47,6 @@ public:
     ~Call();
 
     /* \brief reset the parameter count of this call
-     * \note currently does not pop any values, use with care!
      */
     void clear();
 

@@ -22,7 +22,6 @@
 #ifndef SLW_TYPES_H
 #define SLW_TYPES_H
 
-//#include <lua.hpp>
 #include <string>
 #include <cstdlib>
 

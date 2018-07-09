@@ -78,23 +78,18 @@ option(SLW_BUILD_TESTS "Build test suite for libslw" OFF)
 
 if (SLW_BUILD_TESTS)
 	add_executable(${PROJECT_NAME}-ci
-	  src/call.cpp
-	  src/field.cpp
-	  src/get_field.cpp
-	  src/state.cpp
-	  src/types.cpp
-	  src/utility.cpp
-	  src/helpers/tostring.cpp
-	  src/state/peek.cpp
-	  src/state/pop.cpp
-	  src/state/push.cpp
-	  src/state/remove.cpp
-	  src/main.cpp
+    tests/main.cpp
+    tests/state.copy.cpp
+    tests/state.load.cpp
+    tests/state.peek.cpp
+    tests/state.pop.cpp
+    tests/state.push.cpp
 	)
 
 	target_include_directories(${PROJECT_NAME}-ci PRIVATE 
 	  include
 	  src
+          tests
 	  ${LUA_INCLUDE_DIR}
 	)
 

@@ -1,11 +1,11 @@
 language: c++
 
-sudo: false
+sudo: required
 dist: trusty
 before_install:
-  - apt-get install -y libluajit-5.1
-  - apt-get install -y libluajit-5.1-dev 
-  - apt-get install -y libluajit-5.1-common
+  - sudo apt-get install -y libluajit-5.1
+  - sudo apt-get install -y libluajit-5.1-dev 
+  - sudo apt-get install -y libluajit-5.1-common
 script:
   - mkdir build && cd build
   - cmake -DCMAKE_BUILD_TYPE=Release -DSLW_BUILD_TESTS=ON ..

@@ -3,9 +3,8 @@ language: c++
 sudo: required
 dist: trusty
 before_install:
-  - sudo apt-get install -y libluajit-5.1
-  - sudo apt-get install -y libluajit-5.1-dev 
-  - sudo apt-get install -y libluajit-5.1-common
+  - sudo apt-get install -y liblua5.1-0
+  - sudo apt-get install -y liblua5.1-0-dev 
 script:
   - mkdir build && cd build
   - cmake -DCMAKE_BUILD_TYPE=Release -DSLW_BUILD_TESTS=ON ..

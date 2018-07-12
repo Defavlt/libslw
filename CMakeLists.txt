@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 
 set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 3)
-set(PROJECT_VERSION_PATCH 3)
+set(PROJECT_VERSION_PATCH 5)
 
 set(PROJECT_DESCRIPTION "Quality of life when working with the Lua C API")
 

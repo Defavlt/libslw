@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.7)
 include(CMakeFindDependencyMacro)
 
 get_filename_component(SLW_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)

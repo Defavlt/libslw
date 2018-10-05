@@ -30,7 +30,7 @@ namespace slw {
 namespace internal {
 
 template<typename _field_t, typename _value_t>
-struct setter {
+struct property {
     typedef _field_t field_t;
     typedef _value_t value_t;
 
@@ -66,12 +66,12 @@ struct setter {
  *   age = 25;
  **/
 class Field {
-    friend class slw::internal::setter<slw::Field, slw::string_t>;
-    friend class slw::internal::setter<slw::Field, slw::number_t>;
-    friend class slw::internal::setter<slw::Field, long>;
-    friend class slw::internal::setter<slw::Field, int>;
-    friend class slw::internal::setter<slw::Field, char>;
-    friend class slw::internal::setter<slw::Field, bool>;
+    friend class slw::internal::property<slw::Field, slw::string_t>;
+    friend class slw::internal::property<slw::Field, slw::number_t>;
+    friend class slw::internal::property<slw::Field, long>;
+    friend class slw::internal::property<slw::Field, int>;
+    friend class slw::internal::property<slw::Field, char>;
+    friend class slw::internal::property<slw::Field, bool>;
 
 public:
 
@@ -79,20 +79,20 @@ public:
 
     void table(int narr = 0, int nrec = 0);
 
-    template<typename _value_t, typename _setter_t = slw::internal::setter<Field, _value_t>>
+    template<typename _value_t, typename _setter_t = slw::internal::property<Field, _value_t>>
     _setter_t field(slw::string_t _name)
     {
         return _setter_t {*this, _name, index};
     }
 
-    template<typename _value_t, typename _setter_t = slw::internal::setter<Field, _value_t>>
+    template<typename _value_t, typename _setter_t = slw::internal::property<Field, _value_t>>
     _setter_t field(slw::string_t _name, _value_t _defaults)
     {
         return _setter_t {*this, _name, index, _defaults};
     }
 
     template<typename _value_t>
-    Field &operator =(slw::internal::setter<Field, _value_t> &rhs)
+    Field &operator =(slw::internal::property<Field, _value_t> &rhs)
     {
         set(rhs.name, rhs.index, rhs.value);
         return *this;

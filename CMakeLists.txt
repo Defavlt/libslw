@@ -8,7 +8,7 @@ set(PROJECT_DESCRIPTION "Quality of life when working with the Lua C API")
 
 project("slw"
   VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
-    LANGUAGES CXX
+  LANGUAGES CXX
 )
 
 option(SLW_ALLOW_INSTALLATION "Generate installation information" ON)
@@ -33,6 +33,14 @@ set(PUBLIC_HEADERS
   include/slw/utility.hpp
 )
 
+set(PRIVATE_HEADERS
+  src/helpers/peek.hpp
+  src/helpers/pop.hpp
+  src/helpers/push.hpp
+  src/helpers/remove.hpp
+  src/helpers/tostring.hpp
+)
+
 add_library(${PROJECT_NAME} SHARED
   src/call.cpp
   src/field.cpp
@@ -46,12 +54,7 @@ add_library(${PROJECT_NAME} SHARED
   src/state/push.cpp
   src/state/remove.cpp
 
-  src/helpers/peek.hpp
-  src/helpers/pop.hpp
-  src/helpers/push.hpp
-  src/helpers/remove.hpp
-  src/helpers/tostring.hpp
-
+  ${PRIVATE_HEADERS}
   ${PUBLIC_HEADERS}
 )
 

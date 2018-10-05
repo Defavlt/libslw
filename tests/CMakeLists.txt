@@ -10,11 +10,11 @@ endif()
 	
 add_executable(${PROJECT_NAME}-ci
   src/main.cpp
-  src/state.copy.cpp
-  src/state.load.cpp
-  src/state.peek.cpp
-  src/state.pop.cpp
-  src/state.push.cpp
+  src/state/copy.cpp
+  src/state/load.cpp
+  src/state/peek.cpp
+  src/state/pop.cpp
+  src/state/push.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}-ci 

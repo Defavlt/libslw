@@ -50,8 +50,16 @@ bool slw::get_field(lua_State *state, slw::string_t field)
     //  i.e. level = 3 if table0.table1.table2
     unsigned int level = 0;
 
+    // the previous character
+    char previous_c = fn_or_obj[current_i];
+
     for ( ; current_i < length; ) {
         const char &current_c = fn_or_obj[current_i];
+
+        // make sure to invalidate multiple '.'
+        if ('.' == previous_c) {
+            log_error("Unexpected character (%d)\n", current_i);
+        }
 
         switch(current_c) {
         case '.': {
@@ -89,6 +97,8 @@ bool slw::get_field(lua_State *state, slw::string_t field)
             ++current_i;
             break;
         }
+
+        previous_c = current_c;
     }
 
     if (!boundary)

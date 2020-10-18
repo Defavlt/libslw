@@ -22,127 +22,58 @@
 #ifndef SLW_STATE_H
 #define SLW_STATE_H
 
-#include <exception>
-#include <vector>
-
+#include <memory>
 #include "slw/types.hpp"
-#include "slw/stdout.hpp"
 
 struct lua_State;
 
 namespace slw {
 
-class Call;
-class Field;
-class State;
+////////////////////////////////////////////////////////////
+/// \brief A shared, or managed, Lua state
+////////////////////////////////////////////////////////////
+typedef std::shared_ptr<lua_State> shared_state;
 
-class State {
-private:
-    static const char *const magic;
+////////////////////////////////////////////////////////////
+/// \brief Make a new shared Lua state
+////////////////////////////////////////////////////////////
+shared_state make_state();
 
-    int ref();
-    int deref();
+////////////////////////////////////////////////////////////
+/// \brief Open the Lua standard libraries
+////////////////////////////////////////////////////////////
+void open_libs(shared_state);
 
-public:
+////////////////////////////////////////////////////////////
+/// \brief Get the current size of the stack, e.g. the top.
+/// \return The size
+////////////////////////////////////////////////////////////
+slw::size_t get_size(const shared_state &);
 
-    int refs();
+////////////////////////////////////////////////////////////
+/// \brief Clear the stack
+/// \param N The number of elements to pop. If 0, clear the stack, but if
+/// less than 0, pop (top - abs(N)) elements.
+////////////////////////////////////////////////////////////
+void clear(shared_state &, slw::int_t N = 0);
 
-    friend class slw::Call;
-    friend class slw::Field;
-
-    State();
-
-    State(State &);
-    State(lua_State *);
-
-    ~State();
-
-    bool
-    load(const char *str, const bool str_is_file = true);
-
-    template<typename _value_t>
-    _value_t pop(_value_t _defaults)
-    {
-        pop(_defaults);
-        return _defaults;
-    }
-
-    /* \brief Pop a value from the stack
-     * \return true if the stack isn't empty and there's an actual
-     *     value
-     *
-     * \param the pop'd value
-     * \param force will force a pop if true
-     */
-    bool pop(slw::string_t &, bool force = false);
-    bool pop(number_t &, bool force = false);
-    bool pop(long &, bool force = false);
-    bool pop(int &, bool force = false);
-    bool pop(char &, bool force = false);
-    bool pop(bool &, bool force = false);
-
-    /* \brief Pop a value, from the stack, at a particular offset
-     * \return true if the value at the offset is of the correct type
-     * \param the removed value
-     * \param offset, or index, of the value
-     */
-    bool remove(slw::string_t &, int offset);
-    bool remove(slw::number_t &, int offset);
-    bool remove(long &, int offset);
-    bool remove(int &, int offset);
-    bool remove(char &, int offset);
-    bool remove(bool &, int offset);
-
-    /* \brief Pop the value at the top of the stack
-     */
-    bool pop();
-
-    template<typename _value_t>
-    _value_t peek(_value_t _defaults)
-    {
-        peek(_defaults);
-        return _defaults;
-    }
-
-    /* \brief Peek at the stack - optionally from an offset
-     * \return true if the stack isn't empty and there's an actual
-     *     value
-     *
-     * \param v the value in the stack
-     **/
-    bool peek(slw::string_t &, int offset = -1);
-    bool peek(number_t &, int offset = -1);
-    bool peek(long &, int offset = -1);
-    bool peek(int &, int offset = -1);
-    bool peek(char &, int offset = -1);
-    bool peek(bool &, int offset = -1);
-
-    /* \brief push a value to the top of the stack
-     **/
-    void push(slw::string_t);
-    void push(number_t);
-    void push(long);
-    void push(int);
-    void push(char);
-    void push(bool);
-
-    /* \brief push a nil value to the top of the stack
-     **/
-    void push();
-
-    void dostring(slw::string_t);
-    void dofile(slw::string_t);
-
-    /* \brief the current size of the stack
-     **/
-    int size();
-
-    int type(int index = -1);
-    slw::string_t type_name(int);
-    int top();
-
-    lua_State *state;
-};
 } //namespace slw
+
+////////////////////////////////////////////////////////////
+/// \typedef slw::shared_state
+///
+/// A managed Lua state. Automatically calls lua_close when
+///  destroyed.
+///
+/// Usage example:
+/// \code
+/// // Declare, and create a new Lua state
+/// slw::shared_state state = slw::make_state();
+/// // Open the standard Lua libraries
+/// slw::open_libs(state);
+/// \endcode
+///
+/// \see std::shared_ptr
+////////////////////////////////////////////////////////////
 
 #endif // SLW_STATE_H

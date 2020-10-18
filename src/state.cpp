@@ -20,104 +20,28 @@
 **/
 
 #include "lua.hpp"
-
 #include "slw/state.hpp"
-#include "slw/field.hpp"
-#include "helpers/push.hpp"
-#include "helpers/peek.hpp"
 
-const char *const slw::State::magic = "__slw__state__magic";
-
-int slw::State::ref()
+slw::shared_state slw::make_state()
 {
-    slw::Field field(*this);
-
-    auto ref_count = field.field<int>(magic, 0);
-    ref_count = ref_count + 1;
-
-    return ref_count;
+    lua_State *state = luaL_newstate();
+    return shared_state (state, lua_close);
 }
 
-int slw::State::deref()
+void slw::open_libs(slw::shared_state state)
 {
-    slw::Field field(*this);
-
-    auto ref_count = field.field<int>(magic, 0);
-    ref_count = ref_count - 1;
-
-    return ref_count;
+    luaL_openlibs(state.get());
 }
 
-int slw::State::refs()
+slw::size_t slw::get_size(const slw::shared_state &state)
 {
-    slw::Field field(*this);
-
-    auto ref_count = field.field<int>(magic, 0);
-
-    return ref_count;
+    return lua_gettop(state.get());
 }
 
-slw::State::State()
-    : state(luaL_newstate())
+void slw::clear(slw::shared_state &state, slw::int_t N/* = 0*/)
 {
-    luaL_openlibs(state);
+    if (!N)
+        N = slw::get_size(state);
 
-    ref();
-}
-
-slw::State::State(slw::State &state)
-    : state(state.state)
-{
-    ref();
-}
-
-slw::State::State(lua_State *state)
-    : state(state)
-{
-    ref();
-}
-
-slw::State::~State()
-{
-    if (!deref())
-        lua_close(state);
-
-    state = NULL;
-}
-
-bool
-slw::State::load(const char *str, const bool isFile /* = true */)
-{
-    if (isFile)
-        luaL_loadfile(state, str);
-
-    else
-        luaL_loadstring(state, str);
-
-    return lua_pcall(state, 0, LUA_MULTRET, 0);
-}
-
-void slw::State::dostring(slw::string_t str)
-{
-    luaL_dostring(state, str.c_str());
-}
-
-int slw::State::size()
-{
-    return lua_gettop(state);
-}
-
-int slw::State::type(int index/* = -1 */)
-{
-    return lua_type(state, index);
-}
-
-slw::string_t slw::State::type_name(int type)
-{
-    return lua_typename(state, type);
-}
-
-int slw::State::top()
-{
-    return lua_gettop(state);
+    lua_pop(state.get(), N);
 }

@@ -34,7 +34,6 @@ set(PUBLIC_HEADERS
   include/slw/types.hpp
   include/slw/utility.hpp
   include/slw/reference.hpp
-  include/slw/value.hpp
   include/slw/functional.hpp
   include/slw/exception.hpp
   include/slw/range/type_range.hpp
@@ -62,7 +61,6 @@ set(SOURCES
     src/types.cpp
     src/utility.cpp
     src/reference.cpp
-    src/value.cpp
     src/functional.cpp
     src/exception.cpp
     src/variant/variant.cpp

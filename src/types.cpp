@@ -22,9 +22,8 @@
 #include "slw/types.hpp"
 #include "lua.hpp"
 
-const int slw::internal::indexes::globals(LUA_GLOBALSINDEX);
-const int slw::internal::indexes::registry(LUA_REGISTRYINDEX);
-const int slw::internal::indexes::environ(LUA_ENVIRONINDEX);
+const slw::int_t slw::internal::indexes::globals(LUA_RIDX_GLOBALS);
+const slw::int_t slw::internal::indexes::registry(LUA_REGISTRYINDEX);
 
 int slw::internal::indexes::upvalue(int offset)
 {

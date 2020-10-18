@@ -1,43 +1,44 @@
 #include "slw/utility.hpp"
+#include "lua.hpp"
 #include <string>
 
-void slw::debug::print_stack_contents(slw::State &state, std::ostream &cout)
+#define is_lua_type(native_type, lua_type_check)            \
+bool slw::is(slw::shared_state state, native_type &value)   \
+{                                                           \
+    auto m = bind(                                          \
+        [&]() { value.get().push(); },                      \
+        [&]() { lua_pop(state.get(), 1); }                  \
+    );                                                      \
+                                                            \
+    return lua_type_check(state.get(), -1);                 \
+}
+
+is_lua_type(slw::number, lua_isnumber)
+is_lua_type(slw::uinteger, lua_isnumber)
+is_lua_type(slw::integer, lua_isnumber)
+is_lua_type(slw::string, lua_isstring)
+is_lua_type(slw::boolean, lua_isboolean)
+
+bool slw::is(slw::shared_state state, slw::table &value)
 {
-    int size = -state.top();
+    auto m = bind(
+        [&]() { value.get().push(); },
+        [&]() { lua_pop(state.get(), 1); }
+    );
 
-    for (; size; ++size)
-    {
-        int index = size;
-        int type = state.type(index);
+    return lua_istable(state.get(), -1);
+}
 
-        cout << "[" << state.type_name(type) << "] ";
-        cout << std::to_string(size) << ":";
+#undef is_lua_type
 
-        switch(type)
-        {
-        case slw::TNUMBER:
-            {
-                slw::number_t _num = 0;
-                state.peek(_num, index);
-                cout << std::to_string(_num) << std::endl;
-                break;
-            }
-        case slw::TBOOLEAN:
-            {
-                bool _bool;
-                state.peek(_bool, index);
-                cout << std::to_string(_bool) << std::endl;
-                break;
-            }
+slw::table slw::registry(slw::shared_state state)
+{
+    return slw::table {
+        state, slw::internal::indexes::registry
+    };
+}
 
-        default:
-        case slw::TSTRING:
-            {
-                slw::string_t _str;
-                state.peek(_str, index);
-                cout << _str << std::endl;
-                break;
-            }
-        }
-    }
+slw::table slw::globals(slw::shared_state state)
+{
+    return registry(state).get<slw::table_t>(slw::internal::indexes::globals);
 }

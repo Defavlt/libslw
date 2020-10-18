@@ -24,11 +24,20 @@
 
 #include <string>
 #include <cstdlib>
+#include <stddef.h>
 
 namespace slw {
+
 typedef double number_t;
+typedef unsigned int uint_t;
+typedef std::ptrdiff_t int_t;
 typedef std::string string_t;
 typedef std::size_t size_t;
+typedef void table_t;
+typedef bool bool_t;
+
+struct function_t {
+};
 
 enum type_e
 {
@@ -47,9 +56,8 @@ enum type_e
 
 namespace internal {
 namespace indexes {
-    extern const int globals;
-    extern const int registry;
-    extern const int environ;
+    extern const slw::int_t globals;
+    extern const slw::int_t registry;
 
     int upvalue(int offset = 0);
 }//ns indexes

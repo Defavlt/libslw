@@ -4,9 +4,6 @@
 #include "state.hpp"
 #include "types.hpp"
 
-template<typename Tp>
-class variant;
-
 namespace slw {
 
 ////////////////////////////////////////////////////////////

@@ -1,7 +1,5 @@
 #include "slw/reference.hpp"
 #include "slw/get_field.hpp"
-#include "slw/variant/variant.hpp"
-#include "slw/variant/factory.hpp"
 #include <lua.hpp>
 
 #include <string>

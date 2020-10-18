@@ -1,15 +1,14 @@
-#ifndef VARIANT_VARIANT_BOOL_HPP
-#define VARIANT_VARIANT_BOOL_HPP
+#ifndef SLW_VARIANT_INT_HPP
+#define SLW_VARIANT_INT_HPP
 
 #include "slw/variant/variant.hpp"
-#include "slw/reference.hpp"
 
 namespace slw {
 
 template<>
-struct variant<slw::bool_t> {
-    typedef slw::bool_t expected_value_type;
-    static constexpr type_e internal_value_type = TBOOLEAN;
+struct variant<slw::int_t> {
+    typedef slw::int_t expected_value_type;
+    static constexpr type_e internal_value_type = TNUMBER;
 
     ////////////////////////////////////////////////////////////
     /// \see slw::variant::variant
@@ -34,12 +33,11 @@ struct variant<slw::bool_t> {
     ////////////////////////////////////////////////////////////
     /// \see slw::variant::variant
     ////////////////////////////////////////////////////////////
-    variant(const slw::reference &);
+    variant(const slw::reference &ref);
 
     ////////////////////////////////////////////////////////////
     /// \see slw::variant::operator *
     ////////////////////////////////////////////////////////////
-    expected_value_type operator *();
     expected_value_type operator *() const;
 
     ////////////////////////////////////////////////////////////
@@ -66,9 +64,7 @@ struct variant<slw::bool_t> {
     ////////////////////////////////////////////////////////////
     /// \see slw::variant::get
     ////////////////////////////////////////////////////////////
-    slw::reference get()
-    { return M_ref;
-    }
+    slw::reference get();
 
 private:
 
@@ -83,8 +79,8 @@ private:
     slw::reference M_ref;
 };
 
-typedef variant<slw::bool_t> boolean;
+typedef variant<slw::int_t> integer;
 
-} //namespace slw-
+} //namespace slw
 
-#endif // VARIANT_VARIANT_BOOL_HPP
+#endif //SLW_VARIANT_INT_HPP

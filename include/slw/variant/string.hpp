@@ -1,15 +1,18 @@
-#ifndef VARIANT_VARIANT_BOOL_HPP
-#define VARIANT_VARIANT_BOOL_HPP
+#ifndef SLW_VARIANT_STRING_HPP
+#define SLW_VARIANT_STRING_HPP
 
 #include "slw/variant/variant.hpp"
-#include "slw/reference.hpp"
 
 namespace slw {
 
 template<>
-struct variant<slw::bool_t> {
-    typedef slw::bool_t expected_value_type;
-    static constexpr type_e internal_value_type = TBOOLEAN;
+////////////////////////////////////////////////////////////
+/// \brief slw::variant specialization for slw::string_t
+/// \see slw::string_t
+////////////////////////////////////////////////////////////
+struct variant<slw::string_t> {
+    typedef slw::string_t expected_value_type;
+    static constexpr type_e internal_value_type = TSTRING;
 
     ////////////////////////////////////////////////////////////
     /// \see slw::variant::variant
@@ -64,11 +67,18 @@ struct variant<slw::bool_t> {
     bool operator !=(const variant<expected_value_type> &&) const;
 
     ////////////////////////////////////////////////////////////
+    /// \brief Subscript operator for accessing individual characters
+    /// of a string. Uses Lua conventions for negative indices, but
+    /// indices are aligned at 0.
+    /// \return The character at the specified index
+    /// \throw slw::out_of_range
+    ////////////////////////////////////////////////////////////
+    char operator [](slw::int_t);
+
+    ////////////////////////////////////////////////////////////
     /// \see slw::variant::get
     ////////////////////////////////////////////////////////////
-    slw::reference get()
-    { return M_ref;
-    }
+    slw::reference get();
 
 private:
 
@@ -83,8 +93,8 @@ private:
     slw::reference M_ref;
 };
 
-typedef variant<slw::bool_t> boolean;
+typedef variant<slw::string_t> string;
 
-} //namespace slw-
+} //namespace slw
 
-#endif // VARIANT_VARIANT_BOOL_HPP
+#endif //SLW_VARIANT_STRING_HPP

@@ -19,120 +19,154 @@
 *	Andre Andersson <andre.eric.andersson@gmail.com>
 **/
 
-#include "lua.hpp"
-
-#include <cstdlib>
-#include <cstring>
-
 #include "slw/get_field.hpp"
-#include "slw/types.hpp"
-#include "slw/stdout.hpp"
+#include "lua.hpp"
+#include <string>
+#include <vector>
+#include <iostream>
 
-bool slw::get_field(slw::State &state, slw::string_t field)
+#define _head(x) std::get<0>( (x) )
+#define _tail(x) std::get<1>( (x) )
+
+slw::internal::cons slw::internal::split_path(const std::string &path, const char separator/* = '.'*/)
 {
-    return slw::get_field(state.state, field);
+    std::string h { "" };
+    std::size_t i = 0;
+
+    for (; i < path.length(); ++i) {
+        const char c = path[i];
+        if (separator == c) {
+             // break the collection if, and only if, h isn't empty
+             //  since an empty h is an indication of multiple separators
+            if (h.length())
+                break;
+             // make sure we don't collect the character (it's a separator)
+             continue;
+        }
+
+        h += c;
+    }
+
+    std::string t { "" };
+
+    // get the remaining string *after* the separator/s,
+    //  but if the index is less than the path length,
+    //  the remainder is an *empty string*
+    if (++i < path.length())
+        t = path.substr(i);
+
+    return std::make_tuple(
+        h,
+        t
+    );
 }
 
-bool slw::get_field(lua_State *state, slw::string_t field)
+slw::internal::path::iterator::iterator(const std::string &path, const char separator/* = '.'*/)
+    : M_cons(slw::internal::split_path(path, separator))
+    , M_separator(separator)
+    , M_end(!path.length())
 {
-    const unsigned int length = field.size();
-    const char *fn_or_obj = field.c_str();
+}
 
-    // the current character index
-    unsigned int current_i = 0;
+slw::internal::path::iterator &slw::internal::path::iterator::operator ++()
+{
+    M_cons = split_path(tail(), M_separator);
+    M_end = !tail().length() && !_head(M_cons).length();
+    return *this;
+}
 
-    // the boundary at which each the current level
-    // of recursion resides at
-    //  i.e. recursion = 6 if table0.
-    unsigned int boundary = 0;
+slw::internal::path::iterator slw::internal::path::iterator::operator ++(int)
+{
+    path::iterator at = *this;
+    ++(*this);
+    return at;
+}
 
-    // the level of recursion
-    //  i.e. level = 3 if table0.table1.table2
-    unsigned int level = 0;
+bool slw::internal::path::iterator::operator ==(const slw::internal::path::iterator &other) const
+{
+    return this == &other
+            || (_head(M_cons) == _head(M_cons)
+                && _tail(M_cons) == _tail(other.M_cons)
+                && M_end == other.M_end);
+}
 
-    // the previous character
-    char previous_c = fn_or_obj[current_i];
+bool slw::internal::path::iterator::operator !=(const path::iterator &other) const
+{
+    return !(*this == other);
+}
 
-    for ( ; current_i < length; ) {
-        const char &current_c = fn_or_obj[current_i];
+slw::internal::path::iterator::reference slw::internal::path::iterator::operator *()
+{
+    return _head(M_cons);
+}
 
-        // make sure to invalidate multiple '.'
-        if ('.' == previous_c) {
-            log_error("Unexpected character (%d)\n", current_i);
-        }
+slw::internal::path::iterator::reference slw::internal::path::iterator::tail()
+{
+    return _tail(M_cons);
+}
 
-        switch(current_c) {
-        case '.': {
-            const unsigned int block_l = current_i - boundary;
-            slw::string_t substr = field.substr(boundary, block_l);
-            const char *csubstr = substr.c_str();
+slw::internal::path::path(const std::string &path, const char separator/* = '.'*/)
+    : M_end("", separator)
+    , M_begin(path, separator)
+{
+}
 
-            if ( !boundary )
-                lua_getglobal(state, csubstr);
+slw::internal::path::iterator slw::internal::path::begin()
+{
+    return M_begin;
+}
 
-            else {
-                lua_pushstring(state, csubstr);
-                ++level;
+slw::internal::path::iterator slw::internal::path::end()
+{
+    return M_end;
+}
 
-                if ( !lua_istable(state, -2) ) {
-                    log_error("Attempt to index a nil value ('%s')\n", fn_or_obj);
+void slw::internal::touch_path(lua_State *L, const std::string &path, int t, char separator)
+{
+    slw::internal::path to { path, separator };
+    slw::internal::path::iterator at = to.begin();
 
-                    lua_pop(state, (int) level);
-                    return false;
-                }
-
-                else {
-                    lua_gettable(state, -2);
-                    lua_remove(state, -2);
-                }
-            }
-
-            ++current_i;
-            boundary = current_i;
-
-            break;
-        }
-
-        default:
-            ++current_i;
-            break;
-        }
-
-        previous_c = current_c;
+    // make sure we catch any attempt to index global fields early on
+    // LUA_GLOBALSINDEX, et. al. doesn't play very well with pseudo-indices
+    if (LUA_RIDX_GLOBALS == t) {
+        lua_getglobal(L, (*at).c_str());
+        ++at;
     }
 
-    if (!boundary)
-        lua_getglobal(state, fn_or_obj);
+    int top = lua_gettop(L);
+    int type = lua_type(L, -1);
 
-    else {
-        if ( lua_isnil(state, -1)) {
-            log_error("Attempt to index a nil value ('%s')\n", fn_or_obj);
-            lua_pop(state, (int) level);
+    if (to.end() != at) {
 
-            return false;
+        if (!lua_istable(L, -1)) {
+            lua_pop(L, 1);
+            lua_createtable(L, 0, 1);
+            lua_setglobal(L, (*at).c_str());
+            lua_getglobal(L, (*at).c_str());
         }
 
-        else {
-            const unsigned int block_l = current_i - boundary;
-            slw::string_t substr = field.substr(boundary, block_l);
-            const char *csubstr = substr.c_str();
+        lua_getfield(L, -1, (*at).c_str());
 
-            lua_pushstring(state, csubstr);
-            ++level;
+        for (int t = -1, i = lua_gettop(L); i > 0; --i, --t) {
+            top = lua_gettop(L);
+            type = lua_type(L, -1);
+        }
 
-            if (lua_istable(state, -2)) {
-                lua_gettable(state, -2);
-                lua_remove(state, -2);
+        lua_replace(L, -2);
+        ++at;
+
+        slw::internal::path::iterator next = at;
+        ++next;
+        for (; to.end() != at; ++at, ++next) {
+            lua_getfield(L, -1, (*at).c_str());
+
+            if (to.end() != next && !lua_istable(L, -1)) {
+                lua_createtable(L, 0, 1);
+                lua_setfield(L, -2, (*at).c_str());
+                lua_getfield(L, -1, (*at).c_str());
             }
 
-            else {
-                log_error("Attempt to index a nil value ('%s')\n", fn_or_obj);
-                lua_pop(state, (int) level);
-
-                return false;
-            }
+            lua_replace(L, -2);
         }
     }
-
-    return true;
 }

@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.7)
+include(CMakeDependentOption)
+include(CMakePrintHelpers)
 
 set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 3)
@@ -11,54 +13,97 @@ project("slw"
   LANGUAGES CXX
 )
 
-option(SLW_ALLOW_INSTALLATION "Generate installation information" ON)
-option(SLW_BUILD_TESTS "Build test suite for libslw" OFF)
+cmake_dependent_option(SLW_BUILD_TESTS "Generate installation information" ON
+    "NOT SLW_ALLOW_INSTALLATION" OFF)
 
-set(CMAKE_CXX_STANDARD 11)
+option(SLW_BUILD_TESTS "Build test suite for libslw" OFF)
+option(SLW_ALLOW_INSTALLATION "Generate installation information" ON)
+
+set(CMAKE_CXX_STANDARD 14)
 list(INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake")
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(Threads REQUIRED)
-find_package(Lua 5.1 REQUIRED)
+find_package(Lua 5.3 REQUIRED)
 
 configure_file("configure.h.in" "include/${PROJECT_NAME}/configure.h")
 
 set(PUBLIC_HEADERS
-  include/slw/call.hpp
-  include/slw/field.hpp
   include/slw/get_field.hpp
   include/slw/state.hpp
-  include/slw/stdout.hpp
   include/slw/types.hpp
   include/slw/utility.hpp
+  include/slw/reference.hpp
+  include/slw/value.hpp
+  include/slw/functional.hpp
+  include/slw/exception.hpp
+  include/slw/range/type_range.hpp
+  include/slw/range/apply.hpp
+  include/slw/variant/variant.hpp
+  include/slw/variant/bool.hpp
+  include/slw/variant/int.hpp
+  include/slw/variant/number.hpp
+  include/slw/variant/string.hpp
+  include/slw/variant/table.hpp
+  include/slw/variant/uint.hpp
+  include/slw/variant/factory.hpp
 )
 
 set(PRIVATE_HEADERS
-  src/helpers/peek.hpp
-  src/helpers/pop.hpp
-  src/helpers/push.hpp
-  src/helpers/remove.hpp
-  src/helpers/tostring.hpp
+    src/variant/variant_ctors.hpp
+    src/variant/variant_numeric_dereference.hpp
+    src/variant/variant_op_assign.hpp
+    src/variant/variant_op_eq.hpp
+)
+
+set(SOURCES
+    src/get_field.cpp
+    src/state.cpp
+    src/types.cpp
+    src/utility.cpp
+    src/reference.cpp
+    src/value.cpp
+    src/functional.cpp
+    src/exception.cpp
+    src/variant/variant.cpp
+    src/variant/bool.cpp
+    src/variant/int.cpp
+    src/variant/number.cpp
+    src/variant/string.cpp
+    src/variant/table.cpp
+    src/variant/uint.cpp
+    src/variant/factory.cpp
+
+    ${PRIVATE_HEADERS}
+    ${PUBLIC_HEADERS}
 )
 
 add_library(${PROJECT_NAME} SHARED
-  src/call.cpp
-  src/field.cpp
-  src/get_field.cpp
-  src/state.cpp
-  src/types.cpp
-  src/utility.cpp
-  src/helpers/tostring.cpp
-  src/state/peek.cpp
-  src/state/pop.cpp
-  src/state/push.cpp
-  src/state/remove.cpp
-
-  ${PRIVATE_HEADERS}
-  ${PUBLIC_HEADERS}
+  ${SOURCES}
 )
 
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+add_executable(${PROJECT_NAME}-test
+    src/main.cpp
+    ${SOURCES}
+)
+
+target_link_libraries(${PROJECT_NAME}-test
+PUBLIC
+  Threads::Threads
+  Lua::Lua
+)
+
+target_include_directories(${PROJECT_NAME}-test
+PUBLIC
+  $<INSTALL_INTERFACE:include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_compile_options(${PROJECT_NAME}-test PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Werror>)
 
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Werror>)
 
@@ -70,14 +115,13 @@ PUBLIC
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
   INTERFACE_LINK_LIBRARIES "Lua::Lua"
 )
 
-target_include_directories(${PROJECT_NAME} 
+target_include_directories(${PROJECT_NAME}
 PUBLIC
   $<INSTALL_INTERFACE:include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -85,23 +129,28 @@ PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-
 if (SLW_BUILD_TESTS)
-  add_subdirectory(tests)
+    if (IS_DIRECTORY ${PROJECT_SOURCE_DIR}/tests)
+        add_subdirectory(tests)
+    elseif(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/share/tests)
+        add_subdirectory(share/tests)
+    endif()
 endif (SLW_BUILD_TESTS)
 
 if (SLW_ALLOW_INSTALLATION)
-	include(GNUInstallDirs)
+  include(GNUInstallDirs)
 
   set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
   set(PROJECT_NAME_TARGETS "${PROJECT_NAME}-targets")
 
   install(TARGETS ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME_TARGETS}
-	  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/slw
-	)
+  )
+
+  install(DIRECTORY include/slw DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.hpp")
 
   install(EXPORT ${PROJECT_NAME_TARGETS}
     FILE ${PROJECT_NAME}Targets.cmake
@@ -109,13 +158,13 @@ if (SLW_ALLOW_INSTALLATION)
     DESTINATION ${INSTALL_CONFIGDIR}
   )
 
-	# pkg-config
-	configure_file(pc.in ${PROJECT_NAME}.pc @ONLY)
+  # pkg-config
+  configure_file(pc.in ${PROJECT_NAME}.pc @ONLY)
 
-	install(FILES
-	  ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc
-	  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
-	)
+  install(FILES
+    ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
+  )
 
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(

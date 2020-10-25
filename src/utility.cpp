@@ -4,14 +4,14 @@
 
 #define is_lua_type(native_type, lua_type_check)                        \
 template<>                                                              \
-bool slw::is<native_type>(slw::shared_state state, slw::reference &r)   \
+bool slw::is<native_type>(slw::reference &r)   \
 {                                                                       \
     auto m = bind(                                                      \
         [&]() { r.push(); },                                            \
-        [&]() { lua_pop(state.get(), 1); }                              \
+        [&]() { lua_pop(r.get_state().get(), 1); }                              \
     );                                                                  \
                                                                         \
-    return lua_type_check(state.get(), -1);                             \
+    return lua_type_check(r.get_state().get(), -1);                     \
 }
 
 is_lua_type(slw::number_t, lua_isnumber)
@@ -25,14 +25,14 @@ is_lua_type(slw::table_t, lua_istable)
 
 #define as_lua_type(native_type, lua_to_type)                               \
 template<>                                                                  \
-native_type slw::as<native_type>(slw::shared_state state, slw::reference &r)\
+native_type slw::as<native_type>(slw::reference &r)\
 {                                                                           \
     auto m = bind(                                                          \
         [&]() { r.push(); },                                                \
-        [&]() { lua_pop(state.get(), 1); }                                  \
+        [&]() { lua_pop(r.get_state().get(), 1); }                                  \
     );                                                                      \
                                                                             \
-    return lua_to_type(state.get(), -1);                                    \
+    return lua_to_type(r.get_state().get(), -1);                            \
 }
 
 as_lua_type(slw::number_t, lua_tonumber)
@@ -43,7 +43,7 @@ as_lua_type(slw::bool_t, lua_toboolean)
 
 template<>
 // for convenience and completeness sake only
-slw::reference slw::as<slw::reference>(slw::shared_state, slw::reference &r)
+slw::reference slw::as<slw::reference>(slw::reference &r)
 { return r;
 }
 

@@ -38,21 +38,6 @@ set(PUBLIC_HEADERS
   include/slw/exception.hpp
   include/slw/range/type_range.hpp
   include/slw/range/apply.hpp
-  include/slw/variant/variant.hpp
-  include/slw/variant/bool.hpp
-  include/slw/variant/int.hpp
-  include/slw/variant/number.hpp
-  include/slw/variant/string.hpp
-  include/slw/variant/table.hpp
-  include/slw/variant/uint.hpp
-  include/slw/variant/factory.hpp
-)
-
-set(PRIVATE_HEADERS
-    src/variant/variant_ctors.hpp
-    src/variant/variant_numeric_dereference.hpp
-    src/variant/variant_op_assign.hpp
-    src/variant/variant_op_eq.hpp
 )
 
 set(SOURCES
@@ -63,16 +48,7 @@ set(SOURCES
     src/reference.cpp
     src/functional.cpp
     src/exception.cpp
-    src/variant/variant.cpp
-    src/variant/bool.cpp
-    src/variant/int.cpp
-    src/variant/number.cpp
-    src/variant/string.cpp
-    src/variant/table.cpp
-    src/variant/uint.cpp
-    src/variant/factory.cpp
 
-    ${PRIVATE_HEADERS}
     ${PUBLIC_HEADERS}
 )
 

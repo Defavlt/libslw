@@ -1,8 +1,6 @@
 #ifndef FUNCTIONAL_HPP
 #define FUNCTIONAL_HPP
 
-#include "lua.hpp"
-
 #include "slw/state.hpp"
 #include "slw/reference.hpp"
 #include "slw/utility.hpp"
@@ -15,7 +13,6 @@
 
 namespace slw {
 
-template<typename Rt, typename ...Ap>
 ////////////////////////////////////////////////////////////
 /// \brief functional is a functor, with built-in argument size, and
 /// approximate type validation, as well as return type validation.
@@ -28,7 +25,8 @@ template<typename Rt, typename ...Ap>
 ///     return "Hello, " + name + "!";
 /// }};
 ///
-/// make_callable(state, slw::globals(state), "a_native_function", &call);
+/// reference r_call = make_callable(state, &call);
+/// // /* assign the callable to a global parameter here...*/
 /// luaL_dostring(state.get(), "return a_native_function(/*...*/)");
 ///
 /// // Now, top -1 contains whatever a_native_function returned.
@@ -36,9 +34,29 @@ template<typename Rt, typename ...Ap>
 ///
 /// \endcode
 ////////////////////////////////////////////////////////////
+template<typename Rt, typename ...Rp>
 struct functional {
+    typedef Rt                  return_type;
+    typedef std::function<Rt()> functional_type;
+
+    functional(shared_state state, functional_type functor)
+        : M_state(state)
+        , M_functor(functor)
+    {}
+
+    return_type operator ()()
+    { return M_functor();
+    }
+
+private:
+    slw::shared_state M_state;
+    functional_type M_functor;
+};
+
+template<typename Rt, typename Fp, typename ...Rp>
+struct functional<Rt, Fp, Rp...> {
     typedef Rt                                  return_type;
-    typedef std::function<Rt(Ap...)>            functional_type;
+    typedef std::function<Rt(Fp, Rp...)>        functional_type;
 
     functional(shared_state state, functional_type functor)
         : M_state(state)
@@ -47,40 +65,46 @@ struct functional {
 
     return_type operator ()()
     {
-        std::size_t argsc = sizeof...(Ap);
+        std::size_t argsc = sizeof...(Rp) + 1;
         slw::size_t size = slw::get_size(M_state);
 
         if (size != argsc || !size)
             throw slw::unexpected_argument_range(M_state, size, argsc);
 
+        // type validation lambda of supplied parameters
         auto val = [&](auto _idx, auto *_tp) -> bool {
             typedef remove_pointer(_tp) element_type;
             slw::reference idx_ref { M_state, _idx() };
-            return slw::is<element_type>(M_state, idx_ref);
+            return slw::is<element_type>(idx_ref);
         };
 
+        // validate the type of all supplied parameters,
+        //  requiring all to be valid
         // TODO: Fix inlining for val
-        if (!range::type_range_t<Ap...>::all(val))
+        if (!range::type_range_t<Fp, Rp...>::all(val))
             throw slw::unexpected_type(M_state);
 
+        // simple unpacking of supplied arguments into a tuple
         auto cat = [](auto &&...args) {
             return std::tuple_cat(args...);
         };
 
+        // retrieve a value at a specific index coerced into a specific type
         auto collect = [&](auto _idx, auto *_tp) {
             typedef remove_pointer(_tp) element_type;
-            element_type e;
             slw::reference ref { M_state, _idx() };
-            return slw::as<element_type>(M_state, ref);
+            return slw::as<element_type>(ref);
         };
 
-        return slw::range::apply<sizeof...(Ap)>(
+        // now iterate through all parameters and collect their value,
+        //  and unpack as actual parameters into the call to M_functor
+        return slw::range::apply<sizeof...(Rp) + 1>(
             M_functor,
-            range::type_range_t<Ap...>::collect(cat, collect));
+            range::type_range_t<Fp, Rp...>::collect(cat, collect));
     }
 
-    return_type operator ()(Ap &&...args)
-    { return functor(args...);
+    return_type operator ()(Fp &&arg0, Rp &&...args)
+    { return functor(arg0, args...);
     }
 
 private:
@@ -94,9 +118,9 @@ struct callable {
     }
 };
 
-template<typename ...A>
+template<typename R, typename ...P>
 struct callable_t : public callable {
-    typedef slw::functional<A...> functional_type;
+    typedef slw::functional<R, P...> functional_type;
     typedef typename functional_type::functional_type function_type;
 
     explicit callable_t(slw::shared_state state, function_type fn)
@@ -105,12 +129,9 @@ struct callable_t : public callable {
     {
     }
 
-    virtual int operator ()() override
+    int operator ()() override
     {
-        auto return_value = M_functor();
-
-        slw::clear(M_state);
-        slw::push(M_state, return_value);
+        slw::push(M_state, M_functor());
         return 1;
     }
 
@@ -130,10 +151,9 @@ struct callable_t<void, A...> : public callable {
     {
     }
 
-    virtual int operator ()() override
+    int operator ()() override
     {
         M_functor();
-        slw::clear(M_state);
         return 0;
     }
 

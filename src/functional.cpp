@@ -9,10 +9,11 @@ int raw_call(lua_State *L)
     return (*C)();
 }
 
-slw::reference slw::make_callable(slw::shared_state state, slw::table t, const slw::string_t &k, callable &f)
+slw::reference slw::make_callable(slw::shared_state state, callable &f)
 {
     lua_pushlightuserdata(state.get(), &f);
     lua_pushcclosure(state.get(), raw_call, 1);
-    t.set(k, -1);
-    return t[k];
+    return slw::reference {
+        state
+    };
 }

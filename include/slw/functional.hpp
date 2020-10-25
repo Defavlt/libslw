@@ -4,9 +4,8 @@
 #include "lua.hpp"
 
 #include "slw/state.hpp"
-#include "slw/value.hpp"
+#include "slw/reference.hpp"
 #include "slw/utility.hpp"
-#include "slw/variant/variant.hpp"
 
 #include "slw/range/type_range.hpp"
 #include "slw/range/apply.hpp"
@@ -56,7 +55,8 @@ struct functional {
 
         auto val = [&](auto _idx, auto *_tp) -> bool {
             typedef remove_pointer(_tp) element_type;
-            return slw::is<element_type>(M_state, _idx());
+            slw::reference idx_ref { M_state, _idx() };
+            return slw::is<element_type>(M_state, idx_ref);
         };
 
         // TODO: Fix inlining for val
@@ -70,7 +70,8 @@ struct functional {
         auto collect = [&](auto _idx, auto *_tp) {
             typedef remove_pointer(_tp) element_type;
             element_type e;
-            return *slw::variant<element_type>(M_state, _idx());
+            slw::reference ref { M_state, _idx() };
+            return slw::as<element_type>(M_state, ref);
         };
 
         return slw::range::apply<sizeof...(Ap)>(
@@ -107,12 +108,9 @@ struct callable_t : public callable {
     virtual int operator ()() override
     {
         auto return_value = M_functor();
-        typedef decltype(return_value) return_type;
 
         slw::clear(M_state);
-        slw::variant<return_type> var { M_state, -1 };
-        var = return_value;
-        var.get().push();
+        slw::push(M_state, return_value);
         return 1;
     }
 
@@ -144,7 +142,7 @@ private:
     functional_type M_functor;
 };
 
-slw::reference make_callable(slw::shared_state state, slw::table t, const slw::string_t &k, callable &f);
+slw::reference make_callable(slw::shared_state state, slw::callable &f);
 
 } /*ns slw*/
 

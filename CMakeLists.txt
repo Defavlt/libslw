@@ -58,27 +58,6 @@ add_library(${PROJECT_NAME} SHARED
 
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-add_executable(${PROJECT_NAME}-test
-    src/main.cpp
-    ${SOURCES}
-)
-
-target_link_libraries(${PROJECT_NAME}-test
-PUBLIC
-  Threads::Threads
-  Lua::Lua
-)
-
-target_include_directories(${PROJECT_NAME}-test
-PUBLIC
-  $<INSTALL_INTERFACE:include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-
-target_compile_options(${PROJECT_NAME}-test PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Werror>)
-
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Werror>)
 
 target_link_libraries(${PROJECT_NAME}
@@ -109,6 +88,27 @@ if (SLW_BUILD_TESTS)
     elseif(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/share/tests)
         add_subdirectory(share/tests)
     endif()
+
+    add_executable(${PROJECT_NAME}-test
+        src/main.cpp
+        ${SOURCES}
+    )
+
+    target_link_libraries(${PROJECT_NAME}-test
+    PUBLIC
+      Threads::Threads
+      Lua::Lua
+    )
+
+    target_include_directories(${PROJECT_NAME}-test
+    PUBLIC
+      $<INSTALL_INTERFACE:include>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/src
+    )
+
+    target_compile_options(${PROJECT_NAME}-test PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Werror>)
 endif (SLW_BUILD_TESTS)
 
 if (SLW_ALLOW_INSTALLATION)

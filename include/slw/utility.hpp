@@ -39,7 +39,7 @@ inline binder<Fpost> bind(Fpre &&pre, Fpost &&post)
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<typename Tp>
-bool is(slw::shared_state, slw::reference &)
+bool is(slw::reference &)
 { throw slw::no_type_specialization();
 }
 
@@ -49,7 +49,7 @@ bool is(slw::shared_state, slw::reference &)
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-bool is<slw::number_t>(slw::shared_state, slw::reference &);
+bool is<slw::number_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Check whether a reference is of the specified type
@@ -57,7 +57,7 @@ bool is<slw::number_t>(slw::shared_state, slw::reference &);
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-bool is<slw::uint_t>(slw::shared_state, slw::reference &);
+bool is<slw::uint_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Check whether a reference is of the specified type
@@ -65,7 +65,7 @@ bool is<slw::uint_t>(slw::shared_state, slw::reference &);
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-bool is<slw::int_t>(slw::shared_state, slw::reference &);
+bool is<slw::int_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Check whether a reference is of the specified type
@@ -73,7 +73,7 @@ bool is<slw::int_t>(slw::shared_state, slw::reference &);
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-bool is<slw::string_t>(slw::shared_state, slw::reference &);
+bool is<slw::string_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Check whether a reference is of the specified type
@@ -81,14 +81,14 @@ bool is<slw::string_t>(slw::shared_state, slw::reference &);
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-bool is<slw::table_t>(slw::shared_state, slw::reference &);
+bool is<slw::table_t>(slw::reference &);
 
 /// \brief Check whether a reference is of the specified type
 /// \return True if it is of the type
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-bool is<slw::bool_t>(slw::shared_state, slw::reference &);
+bool is<slw::bool_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Coerce a reference into a type Tp
@@ -96,7 +96,7 @@ bool is<slw::bool_t>(slw::shared_state, slw::reference &);
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<typename Tp>
-Tp as(slw::shared_state, slw::reference &)
+Tp as(slw::reference &)
 { throw slw::no_type_specialization();
 }
 
@@ -106,7 +106,7 @@ Tp as(slw::shared_state, slw::reference &)
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-slw::number_t as<slw::number_t>(slw::shared_state, slw::reference &);
+slw::number_t as<slw::number_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Coerce a reference into a type Tp
@@ -114,7 +114,7 @@ slw::number_t as<slw::number_t>(slw::shared_state, slw::reference &);
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-slw::uint_t as<slw::uint_t>(slw::shared_state, slw::reference &);
+slw::uint_t as<slw::uint_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Coerce a reference into a type Tp
@@ -122,7 +122,7 @@ slw::uint_t as<slw::uint_t>(slw::shared_state, slw::reference &);
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-slw::int_t as<slw::int_t>(slw::shared_state, slw::reference &);
+slw::int_t as<slw::int_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Coerce a reference into a type Tp
@@ -130,7 +130,7 @@ slw::int_t as<slw::int_t>(slw::shared_state, slw::reference &);
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-slw::string_t as<slw::string_t>(slw::shared_state, slw::reference &);
+slw::string_t as<slw::string_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Coerce a reference into a type Tp
@@ -138,7 +138,7 @@ slw::string_t as<slw::string_t>(slw::shared_state, slw::reference &);
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-slw::table_t as<slw::table_t>(slw::shared_state, slw::reference &);
+slw::table_t as<slw::table_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Coerce a reference into a type Tp
@@ -146,7 +146,7 @@ slw::table_t as<slw::table_t>(slw::shared_state, slw::reference &);
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-slw::bool_t as<slw::bool_t>(slw::shared_state, slw::reference &);
+slw::bool_t as<slw::bool_t>(slw::reference &);
 
 template<typename Ta>
 struct assert {

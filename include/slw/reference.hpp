@@ -8,15 +8,15 @@ namespace slw {
 
 ////////////////////////////////////////////////////////////
 /// \brief Create a reference to an object
-///
-///   State st;
-///   Reference age ("age");
+/// \example
+///   slw::shared_state state = slw::make_state();
+///   slw::reference age ("age");
 ///   slw::type_e type = age.type();
-///   slw::int_t i = age.as<int>();
-///   bool is_number = age.is<slw::number_t>();
+///   bool is_number = slw::is<slw::number_t>(age);
+///   slw::int_t i = slw::as<slw::int_t>(age);
 ///
 /// \see luaL_ref
-/// \see slw::Field
+/// \see slw::state, slw::is, slw::as, slw::push
 ////////////////////////////////////////////////////////////
 struct reference {
 
@@ -215,6 +215,14 @@ template<> void push<slw::bool_t>(slw::shared_state &, slw::bool_t);
 void push(slw::shared_state &, const slw::string_t &);
 void push(slw::shared_state &, slw::reference &);
 
+////////////////////////////////////////////////////////////
+/// \brief push Push a new (empty) table onto the stack.
+/// \param state The lua_State
+/// \note Really just for convenience
+/// \see lua_createtable
+////////////////////////////////////////////////////////////
+void push(slw::shared_state &state);
+
 }/*ns slw*/
 
 ////////////////////////////////////////////////////////////
@@ -227,15 +235,17 @@ void push(slw::shared_state &, slw::reference &);
 /// \code
 /// // Declare, and create a Lua state
 /// slw::shared_state state = slw::make_state();
-/// // Allocate some data, e.g.
-/// // lua_dostring(state.get(), "jack = {}");
-/// // Make a reference to "jack"
-/// slw::reference c_jack = slw::make_reference(state, "jack");
-/// // Clear the global jack slot, e.g.
-/// //  lua_dostring(state.get(), "jack = nil");
-/// // Now "jack" will live on, at least until "c_jack" go out of scope
+/// // Allocate a space for some data, eg.
+/// slw::push(state);
+/// slw::reference our_table { state };
+/// // Let's make it circular!
+/// // e.g. our_table.our_table == our_table
+/// our_table.assign("our_table", our_table);
+/// // At this point, scripts Lua-side can't actually access `our_table`.
+/// // Let's change that!
+/// slw::globals(state).assign("our_table", our_table);
 /// \endcode
 ///
-/// \see slw::shared_state, slw::make_state
+/// \see slw::shared_state, slw::make_state, slw::globals, slw::push
 
 #endif // SLW_REFERENCE_HPP

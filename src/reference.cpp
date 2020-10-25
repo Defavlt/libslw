@@ -1,5 +1,6 @@
 #include "slw/reference.hpp"
 #include "slw/get_field.hpp"
+#include "slw/utility.hpp"
 #include <lua.hpp>
 
 #include <string>
@@ -122,15 +123,23 @@ slw::reference slw::reference::operator [](const slw::int_t &i)
     return slw::reference { M_state, -1 };
 }
 
+slw::reference &slw::reference::operator =(slw::reference &ref)
+{
+    ref.push();
+    assign();
+    return *this;
+}
+
 bool slw::reference::valid()
 {
-    push();
-    bool is_nil =
-            (LUA_REFNIL != M_ref)
+    auto m = slw::bind(
+        [&]() { push(); },
+        [&]() { lua_pop(M_state.get(), 1); }
+    );
+
+    return (LUA_REFNIL != M_ref)
             && (LUA_NOREF != M_ref)
             && (LUA_TNIL != lua_type(M_state.get(), -1));
-    lua_pop(M_state.get(), 1);
-    return is_nil;
 }
 
 bool slw::reference::operator ==(const slw::reference &rhs) const
@@ -171,4 +180,51 @@ slw::type_e slw::reference::type()
 slw::reference slw::make_reference(slw::shared_state state, const slw::string_t &name)
 {
     return slw::reference { state, name };
+}
+
+#define ASSIGN_MT_IMPL(native_type)                                 \
+void slw::reference::assign(const slw::string_t &&k, native_type v) \
+{                                                                   \
+    push();                                                         \
+    slw::push(M_state, v);                                          \
+    lua_setfield(M_state.get(), -2, k.c_str());                     \
+    lua_pop(M_state.get(), 1);                                      \
+}
+
+ASSIGN_MT_IMPL(slw::number_t)
+ASSIGN_MT_IMPL(slw::uint_t)
+ASSIGN_MT_IMPL(slw::int_t)
+ASSIGN_MT_IMPL(const slw::string_t &&)
+ASSIGN_MT_IMPL(slw::bool_t)
+
+void slw::reference::assign(const slw::string_t &&k, slw::reference &v)
+{
+    push();
+    v.push();
+    lua_setfield(M_state.get(), -2, k.c_str());
+    lua_pop(M_state.get(), 1);
+}
+
+#undef ASSIGN_MT_IMPL
+
+#define PUSH_FREE_FN_IMPL(native_type, push_fn)                                \
+template<>                                                                     \
+void slw::push<native_type>(slw::shared_state &state, native_type value)  \
+{ push_fn(state.get(), value);                                                 \
+}
+
+PUSH_FREE_FN_IMPL(slw::number_t, lua_pushnumber)
+PUSH_FREE_FN_IMPL(slw::uint_t, lua_pushinteger)
+PUSH_FREE_FN_IMPL(slw::int_t, lua_pushinteger)
+PUSH_FREE_FN_IMPL(slw::bool_t, lua_pushboolean)
+
+#undef PUSH_FREE_FN_IMPL
+
+void slw::push(slw::shared_state &state, const slw::string_t &value)
+{ lua_pushstring(state.get(), value.c_str());
+}
+
+template<>
+void slw::push(slw::shared_state &state, slw::reference &value)
+{ value.push();
 }

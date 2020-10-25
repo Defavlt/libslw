@@ -30,7 +30,8 @@ struct reference {
     ~reference();
 
     ////////////////////////////////////////////////////////////
-    /// \brief Construct a null reference
+    /// \brief Construct a reference to the object at the top of the stack,
+    /// or, if the stack is empty, a null reference.
     ////////////////////////////////////////////////////////////
     reference(slw::shared_state state);
 
@@ -91,6 +92,44 @@ struct reference {
     ////////////////////////////////////////////////////////////
     void assign();
 
+    ////////////////////////////////////////////////////////////
+    /// \brief set this[k] = v
+    /// \param k the key to assign
+    /// \param v the value
+    /// \return a reference to the value assigned
+    ////////////////////////////////////////////////////////////
+    void  assign(const slw::string_t &&, slw::number_t v);
+
+    ////////////////////////////////////////////////////////////
+    /// \see slw::reference::push
+    ////////////////////////////////////////////////////////////
+    void assign(const slw::string_t &&k, slw::uint_t v);
+
+    ////////////////////////////////////////////////////////////
+    /// \see slw::reference::push
+    ////////////////////////////////////////////////////////////
+    void assign(const slw::string_t &&k, slw::int_t v);
+
+    ////////////////////////////////////////////////////////////
+    /// \see slw::reference::push
+    ////////////////////////////////////////////////////////////
+    void assign(const slw::string_t &&k, slw::string_t v);
+
+    ////////////////////////////////////////////////////////////
+    /// \see slw::reference::push
+    ////////////////////////////////////////////////////////////
+    void assign(const slw::string_t &&k, slw::bool_t v);
+
+    ////////////////////////////////////////////////////////////
+    /// \see slw::reference::push
+    ////////////////////////////////////////////////////////////
+    void assign(const slw::string_t &&k, slw::reference &v);
+
+    ////////////////////////////////////////////////////////////
+    /// \see slw::reference::push
+    ////////////////////////////////////////////////////////////
+    void assign(const slw::string_t &&k, const slw::string_t &&value);
+
     reference operator [](const char *str)
     { return operator [](slw::string_t { str });
     }
@@ -109,12 +148,7 @@ struct reference {
     ////////////////////////////////////////////////////////////
     reference operator [](const slw::int_t &);
 
-    reference &operator =(reference &ref)
-    {
-        ref.push();
-        assign();
-        return *this;
-    }
+    reference &operator =(reference &ref);
 
     ////////////////////////////////////////////////////////////
     /// \brief Is this a valid not-nil reference?
@@ -170,6 +204,17 @@ private:
 /// \param name The name of the field, e.g. person.age, or just age
 ////////////////////////////////////////////////////////////
 reference make_reference(slw::shared_state state, const slw::string_t &name);
+
+template<typename Tp> void push(slw::shared_state &state, Tp);
+
+template<> void push<slw::number_t>(slw::shared_state &, slw::number_t);
+template<> void push<slw::uint_t>(slw::shared_state &, slw::uint_t);
+template<> void push<slw::int_t>(slw::shared_state &, slw::int_t);
+template<> void push<slw::bool_t>(slw::shared_state &, slw::bool_t);
+
+void push(slw::shared_state &, const slw::string_t &);
+void push(slw::shared_state &, slw::reference &);
+
 }/*ns slw*/
 
 ////////////////////////////////////////////////////////////

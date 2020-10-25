@@ -2,43 +2,61 @@
 #include "lua.hpp"
 #include <string>
 
-#define is_lua_type(native_type, lua_type_check)            \
-bool slw::is(slw::shared_state state, native_type &value)   \
-{                                                           \
-    auto m = bind(                                          \
-        [&]() { value.get().push(); },                      \
-        [&]() { lua_pop(state.get(), 1); }                  \
-    );                                                      \
-                                                            \
-    return lua_type_check(state.get(), -1);                 \
+#define is_lua_type(native_type, lua_type_check)                        \
+template<>                                                              \
+bool slw::is<native_type>(slw::shared_state state, slw::reference &r)   \
+{                                                                       \
+    auto m = bind(                                                      \
+        [&]() { r.push(); },                                            \
+        [&]() { lua_pop(state.get(), 1); }                              \
+    );                                                                  \
+                                                                        \
+    return lua_type_check(state.get(), -1);                             \
 }
 
-is_lua_type(slw::number, lua_isnumber)
-is_lua_type(slw::uinteger, lua_isnumber)
-is_lua_type(slw::integer, lua_isnumber)
-is_lua_type(slw::string, lua_isstring)
-is_lua_type(slw::boolean, lua_isboolean)
-
-bool slw::is(slw::shared_state state, slw::table &value)
-{
-    auto m = bind(
-        [&]() { value.get().push(); },
-        [&]() { lua_pop(state.get(), 1); }
-    );
-
-    return lua_istable(state.get(), -1);
-}
+is_lua_type(slw::number_t, lua_isnumber)
+is_lua_type(slw::uint_t, lua_isnumber)
+is_lua_type(slw::int_t, lua_isnumber)
+is_lua_type(slw::string_t, lua_isstring)
+is_lua_type(slw::bool_t, lua_isboolean)
+is_lua_type(slw::table_t, lua_istable)
 
 #undef is_lua_type
 
-slw::table slw::registry(slw::shared_state state)
+#define as_lua_type(native_type, lua_to_type)                               \
+template<>                                                                  \
+native_type slw::as<native_type>(slw::shared_state state, slw::reference &r)\
+{                                                                           \
+    auto m = bind(                                                          \
+        [&]() { r.push(); },                                                \
+        [&]() { lua_pop(state.get(), 1); }                                  \
+    );                                                                      \
+                                                                            \
+    return lua_to_type(state.get(), -1);                                    \
+}
+
+as_lua_type(slw::number_t, lua_tonumber)
+as_lua_type(slw::uint_t, lua_tonumber)
+as_lua_type(slw::int_t, lua_tonumber)
+as_lua_type(slw::string_t, lua_tostring)
+as_lua_type(slw::bool_t, lua_toboolean)
+
+template<>
+// for convenience and completeness sake only
+slw::reference slw::as<slw::reference>(slw::shared_state, slw::reference &r)
+{ return r;
+}
+
+#undef as_lua_type
+
+slw::reference slw::registry(slw::shared_state state)
 {
-    return slw::table {
+    return slw::reference {
         state, slw::internal::indexes::registry
     };
 }
 
-slw::table slw::globals(slw::shared_state state)
+slw::reference slw::globals(slw::shared_state state)
 {
-    return registry(state).get<slw::table_t>(slw::internal::indexes::globals);
+    return registry(state)[slw::internal::indexes::globals];
 }

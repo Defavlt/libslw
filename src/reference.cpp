@@ -62,10 +62,14 @@ slw::reference::reference(slw::shared_state state, slw::reference &t, const slw:
     , M_ref(LUA_REFNIL)
 {
     if (t.valid()) {
-        t.push();
-        lua_createtable(M_state.get(), 0, 0);
+        auto m = bind(
+            [&]() { t.push(); },
+            [&]() { lua_pop(M_state.get(), 1); }
+        );
+
+        slw::push(state);
         lua_setfield(M_state.get(), -2, k.c_str());
-        lua_pop(M_state.get(), 1);
+        M_ref = luaL_ref(state.get(), slw::internal::indexes::registry);
     }
 }
 
@@ -115,12 +119,15 @@ slw::reference slw::reference::operator [](const slw::string_t &path)
 
 slw::reference slw::reference::operator [](const slw::int_t &i)
 {
-    push();
-    lua_rawgeti(M_state.get(), -1, i);
-    lua_remove(M_state.get(), -2);
-    lua_pop(M_state.get(), 1);
+    auto m = bind(
+        [&]() { push(); },
+        [&]() { lua_pop(M_state.get(), 1); }
+    );
 
-    return slw::reference { M_state, -1 };
+    lua_rawgeti(M_state.get(), -1, i);
+    return slw::reference {
+        M_state
+    };
 }
 
 slw::reference &slw::reference::operator =(slw::reference &ref)
@@ -227,4 +234,8 @@ void slw::push(slw::shared_state &state, const slw::string_t &value)
 template<>
 void slw::push(slw::shared_state &state, slw::reference &value)
 { value.push();
+}
+
+void slw::push(slw::shared_state &state)
+{ lua_createtable(state.get(), 0, 0);
 }

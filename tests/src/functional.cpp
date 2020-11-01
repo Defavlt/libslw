@@ -6,8 +6,6 @@
 #include "slw/types.hpp"
 #include "slw/state.hpp"
 #include "slw/functional.hpp"
-#include "slw/variant/variant.hpp"
-#include "slw/variant/factory.hpp"
 
 using namespace slw;
 
@@ -42,9 +40,12 @@ SCENARIO( "functional", "[functional]" ) {
         const char *src_tbl = "callables = {}";
         luaL_dostring(state.get(), src_tbl);
 
-        slw::table callables { state, "callables" };
-        reference ref_0 = make_callable(state, callables, "fn_type0", call_0);
-        reference ref_1 = make_callable(state, callables, "fn_type1", call_1);
+        reference callables { state, "callables" };
+        reference ref_0 = make_callable(state, call_0);
+        reference ref_1 = make_callable(state, call_1);
+
+        callables.assign("fn_type0", ref_0);
+        callables.assign("fn_type1", ref_1);
 
         const char *src_call =
                 "callables.ret0 = callables.fn_type0(\"Hello, world!\")\n"
@@ -54,10 +55,14 @@ SCENARIO( "functional", "[functional]" ) {
 
         THEN("") {
             luaL_dostring(state.get(), src_call);
-            slw::number ret_0 { state, "callables.ret0" };
-            REQUIRE(INT_0 == *ret_0);
-            slw::string ret_1 { state, "callables.ret1" };
-            REQUIRE(STRING_1 == *ret_1);
+            slw::reference ret_0 { state, "callables.ret0" };
+            slw::reference ret_1 { state, "callables.ret1" };
+
+            REQUIRE(slw::is<slw::int_t>(ret_0));
+            REQUIRE(slw::is<slw::string_t>(ret_1));
+
+            REQUIRE(INT_0 == slw::as<slw::int_t>(ret_0));
+            REQUIRE(STRING_1 == slw::as<slw::string_t>(ret_1));
         }
     }
 }

@@ -1,3 +1,7 @@
+# Ignore library workspace testing files
+src/main.cpp
+install.sh
+
 # Ignore shared libraries
 *.so.*
 

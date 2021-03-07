@@ -14,12 +14,84 @@ using namespace slw;
 #define INT_0    0xDEADBEEF
 #define INT_1    0xDEADB00B
 
+class MemberTest {
+public:
+    void call_void_str(const slw::string_t &str) {
+        std::cout << "MemberTest::call_void(" << str << ")" << std::endl;
+    }
+
+    void call_void_void() {
+        std::cout << "MemberTest::call_void_void()" << std::endl;
+    }
+
+    slw::int_t call_int_str(const slw::string_t &str) {
+        std::cout << "MemberTest::call_int_str(" << str << ")" << std::endl;
+        return 1;
+    }
+
+    slw::int_t call_int_void() {
+        std::cout << "MemberTest::call_int_void(" << ")" << std::endl;
+        return 1;
+    }
+
+    void call_void_str2_ref(const slw::string_t &, const slw::string_t &, slw::reference)
+    {
+    }
+};
+
+#define type_fn(type, state, fn) \
+    type::functional_type { state, fn }
+
+#define build_callable(type, name, state, fn) \
+    type name { \
+        state,  \
+        type_fn(type, state, fn) \
+    }
+
+
 SCENARIO( "functional", "[functional]" ) {
     GIVEN( "functor objects of different types" ) {
-        typedef callable_t<slw::int_t, slw::string_t>       fn_type0;
-        typedef callable_t<slw::string_t, slw::string_t>    fn_type1;
 
         slw::shared_state state = make_state();
+        MemberTest instance;
+
+        typedef callable_t<void, slw::string_t> mem_type_void_str;
+        typedef callable_t<void> mem_type_void_void;
+        typedef callable_t<slw::int_t, slw::string_t> mem_type_int_str;
+        typedef callable_t<slw::int_t> mem_type_int_void;
+
+        typedef callable_t<void, slw::string_t, slw::string_t, slw::reference> mem_type_void_str2_ref;
+
+        using namespace std::placeholders;
+
+        mem_type_void_str2_ref mem_call_void_str2_ref {
+            state,
+            std::bind(&MemberTest::call_void_str2_ref, instance, _1, _2, _3)
+        };
+
+        mem_type_void_str mem_call_void_str {
+            state,
+            std::bind(&MemberTest::call_void_str, instance, _1)
+        };
+
+        mem_type_void_void mem_call_void_void {
+            state,
+            std::bind(&MemberTest::call_void_void, instance)
+        };
+
+        mem_type_int_str mem_call_int_str {
+            state,
+            std::bind(&MemberTest::call_int_str, instance, _1)
+        };
+
+        mem_type_int_void mem_call_int_void {
+            state,
+            std::bind(&MemberTest::call_int_void, instance)
+        };
+
+        typedef callable_t<slw::int_t, slw::string_t>       fn_type0;
+        typedef callable_t<slw::string_t, slw::string_t>    fn_type1;
+        typedef callable_t<void> fn_type_void;
 
         fn_type0 call_0 {
             state,
@@ -34,6 +106,13 @@ SCENARIO( "functional", "[functional]" ) {
                 slw::string_t s = "Hello, " + arg0 + "!";
                 std::cout << s << std::endl;
                 return STRING_1;
+            }
+        };
+
+        fn_type_void {
+            state,
+            []() {
+                std::cout << "fn_type_void callback" << std::endl;
             }
         };
 

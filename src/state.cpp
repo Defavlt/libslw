@@ -45,3 +45,37 @@ void slw::clear(slw::shared_state &state, slw::int_t N/* = 0*/)
 
     lua_pop(state.get(), N);
 }
+
+slw::size_t slw::push_range(slw::shared_state &state)
+{
+    return slw::push_range(state, 1, slw::get_size(state));
+}
+
+slw::size_t slw::push_range(slw::shared_state &state, slw::size_t start, slw::size_t N)
+{
+    const slw::size_t stack_size = slw::get_size(state);
+
+    for (int i = start, n = 0; n < N; ++i, ++n) {
+        lua_pushvalue(state.get(), i);
+    }
+
+    return stack_size;
+}
+
+#include <iostream>
+#include "slw/utility.hpp"
+#include "slw/reference.hpp"
+void slw::debug(slw::shared_state &state)
+{
+    if (slw::get_size(state)) {
+        for (int i = 1; i <= slw::get_size(state); ++i) {
+            slw::reference idx { state, i };
+            if (slw::TSTRING == idx.type())
+                std::cout << std::to_string(i) << " [String (value:\"" << slw::as<slw::string_t>(idx) << "\")]" << std::endl;
+
+            else {
+                std::cout << std::to_string(i) << " [Object (type:" << std::to_string(idx.type()) << ")]" << std::endl;
+            }
+        }
+    }
+}

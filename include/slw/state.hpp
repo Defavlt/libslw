@@ -51,6 +51,24 @@ void open_libs(shared_state);
 slw::size_t get_size(const shared_state &);
 
 ////////////////////////////////////////////////////////////
+/// \brief Copy a range of values from, and push them onto the stack
+/// \return The starting index of the original values (e.g. size of stack - N)
+////////////////////////////////////////////////////////////
+slw::size_t push_range(slw::shared_state &state);
+
+////////////////////////////////////////////////////////////
+/// \brief Copy a range of values from, and push them onto the stack
+/// \return The starting index of the original values (e.g. size of stack - N)
+////////////////////////////////////////////////////////////
+slw::size_t push_range(slw::shared_state &state, slw::size_t start, slw::size_t N);
+
+////////////////////////////////////////////////////////////
+/// \brief Debug the stack by printing the contents to stdout
+/// \note DEBUG symbol must be defined
+////////////////////////////////////////////////////////////
+void debug(slw::shared_state &state);
+
+////////////////////////////////////////////////////////////
 /// \brief Clear the stack
 /// \param N The number of elements to pop. If 0, clear the stack, but if
 /// less than 0, pop (top - abs(N)) elements.

@@ -73,7 +73,23 @@ bool is<slw::int_t>(slw::reference &);
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
+bool is<slw::size_t>(slw::reference &);
+
+////////////////////////////////////////////////////////////
+/// \brief Check whether a reference is of the specified type
+/// \return True if it is of the type
+/// \throws slw::no_type_specialization
+////////////////////////////////////////////////////////////
+template<>
 bool is<slw::string_t>(slw::reference &);
+
+////////////////////////////////////////////////////////////
+/// \brief Check whether a reference is of the specified type
+/// \return True if it is of the type
+/// \throws slw::no_type_specialization
+////////////////////////////////////////////////////////////
+template<>
+bool is<slw::bool_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Check whether a reference is of the specified type
@@ -83,12 +99,13 @@ bool is<slw::string_t>(slw::reference &);
 template<>
 bool is<slw::table_t>(slw::reference &);
 
+////////////////////////////////////////////////////////////
 /// \brief Check whether a reference is of the specified type
 /// \return True if it is of the type
 /// \throws slw::no_type_specialization
 ////////////////////////////////////////////////////////////
 template<>
-bool is<slw::bool_t>(slw::reference &);
+bool is<slw::function_t>(slw::reference &);
 
 ////////////////////////////////////////////////////////////
 /// \brief Coerce a reference into a type Tp
@@ -147,6 +164,22 @@ slw::table_t as<slw::table_t>(slw::reference &);
 ////////////////////////////////////////////////////////////
 template<>
 slw::bool_t as<slw::bool_t>(slw::reference &);
+
+////////////////////////////////////////////////////////////
+/// \brief Coerce a reference into a type Tp
+/// \return The value of the reference coerced into the type Tp
+/// \throws slw::no_type_specialization
+////////////////////////////////////////////////////////////
+template<>
+slw::size_t as<slw::size_t>(slw::reference &);
+
+////////////////////////////////////////////////////////////
+/// \brief slw::run Run the specificed source
+/// \see luaL_dostring
+/// \return The stack size after running the source
+/// \remark The return value is a good indication if there's an error in your Lua sources
+////////////////////////////////////////////////////////////
+slw::int_t run(slw::shared_state, const slw::string_t &);
 
 template<typename Ta>
 struct assert {

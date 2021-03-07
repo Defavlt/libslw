@@ -30,11 +30,13 @@ namespace slw {
 
 typedef double number_t;
 typedef unsigned int uint_t;
-typedef std::ptrdiff_t int_t;
+typedef int int_t;
 typedef std::string string_t;
 typedef std::size_t size_t;
-typedef void table_t;
 typedef bool bool_t;
+
+struct table_t {
+};
 
 struct function_t {
 };

@@ -19,7 +19,7 @@ cmake_dependent_option(SLW_BUILD_TESTS "Generate installation information" ON
 option(SLW_BUILD_TESTS "Build test suite for libslw" OFF)
 option(SLW_ALLOW_INSTALLATION "Generate installation information" ON)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 list(INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake")
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
@@ -38,6 +38,7 @@ set(PUBLIC_HEADERS
   include/slw/exception.hpp
   include/slw/range/type_range.hpp
   include/slw/range/apply.hpp
+  include/slw/functional_helpers.hpp
 )
 
 set(SOURCES

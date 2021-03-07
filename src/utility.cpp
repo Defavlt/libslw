@@ -17,9 +17,11 @@ bool slw::is<native_type>(slw::reference &r)   \
 is_lua_type(slw::number_t, lua_isnumber)
 is_lua_type(slw::uint_t, lua_isnumber)
 is_lua_type(slw::int_t, lua_isnumber)
+is_lua_type(slw::size_t, lua_isnumber)
 is_lua_type(slw::string_t, lua_isstring)
 is_lua_type(slw::bool_t, lua_isboolean)
 is_lua_type(slw::table_t, lua_istable)
+is_lua_type(slw::function_t, lua_isfunction)
 
 #undef is_lua_type
 
@@ -38,6 +40,7 @@ native_type slw::as<native_type>(slw::reference &r)\
 as_lua_type(slw::number_t, lua_tonumber)
 as_lua_type(slw::uint_t, lua_tonumber)
 as_lua_type(slw::int_t, lua_tonumber)
+as_lua_type(slw::size_t, lua_tonumber)
 as_lua_type(slw::string_t, lua_tostring)
 as_lua_type(slw::bool_t, lua_toboolean)
 
@@ -59,4 +62,10 @@ slw::reference slw::registry(slw::shared_state state)
 slw::reference slw::globals(slw::shared_state state)
 {
     return registry(state)[slw::internal::indexes::globals];
+}
+
+slw::int_t slw::run(slw::shared_state state, const slw::string_t &src)
+{
+    luaL_dostring(state.get(), src.c_str());
+    return slw::get_size(state);
 }

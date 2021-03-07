@@ -32,21 +32,27 @@ struct type_range<I, C, H> {
     /// \param args Any user-supplied arguments needed for functor \a fn.
     /// \return The result of the call to \a fn
     ////////////////////////////////////////////////////////////
-    static inline bool all(V fn, A &&...args)
+    static inline bool all(V fn)
     {
-        return fn(index_type {}, type, std::forward<A>(args)...);
+        return fn(index_type {}, type);
     }
 
-    template<typename V, typename ...A>
-    static inline bool any(V fn, A &&...args)
+    template<typename V>
+    static inline bool any(V fn)
     {
-        return all(fn, args...);
+        return all(fn);
     }
 
-    template<typename Cat, typename V, typename ...A>
-    static inline auto collect(Cat, V fn, A &&...args)
+    template<typename Cat, typename V>
+    static inline auto collect(Cat, V fn)
     {
-        return std::make_tuple(fn(index_type {}, type, args...));
+        return std::make_tuple(fn(index_type {}, type));
+    }
+
+    template<typename Transform, typename ...Rp>
+    static inline void each(Transform fn, Rp ...rp)
+    {
+        fn(index_type {}, type, rp...);
     }
 };
 
@@ -61,7 +67,7 @@ struct type_range<I, C, H, T...> {
     typedef type_range<I + C, C, T...>    tail_type;
     typedef std::tuple<H, T...>             tuple_type;
 
-    template<typename V, typename ...A>
+    template<typename V>
     ////////////////////////////////////////////////////////////
     /// \brief Validate *all* types, using supplied functor \a fn.
     /// \param fn The functor testing the type.
@@ -69,13 +75,13 @@ struct type_range<I, C, H, T...> {
     /// \param args Any user-supplied arguments needed for functor \a fn.
     /// \return The result of the call to \a fn && ...
     ////////////////////////////////////////////////////////////
-    static inline bool all(V fn, A &&...args)
+    static inline bool all(V fn)
     {
-        return head_type::all(fn, args...)
-                && tail_type::all(fn, args...);
+        return head_type::all(fn)
+                && tail_type::all(fn);
     }
 
-    template<typename V, typename ...A>
+    template<typename V>
     ////////////////////////////////////////////////////////////
     /// \brief Validate *any* type, using supplied functor \a fn.
     /// \param fn The functor testing the type.
@@ -83,25 +89,32 @@ struct type_range<I, C, H, T...> {
     /// \param args Any user-supplied arguments needed for functor \a fn.
     /// \return The result of the call to \a fn || ...
     ////////////////////////////////////////////////////////////
-    static inline bool any(V fn, A &&...args)
+    static inline bool any(V fn)
     {
-        return head_type::any(fn, args...)
-                || tail_type::any(fn, args...);
+        return head_type::any(fn)
+                || tail_type::any(fn);
     }
 
-    template<typename Cat, typename Collector, typename ...A>
+    template<typename Cat, typename Collector>
     ////////////////////////////////////////////////////////////
     /// \brief Collect the types, using supplied functor \a fn.
     /// \param fn The functor transforming the type
     /// \param args Any user-supplied arguments needed for functor \a fn.
     /// \return The resulting type
     ////////////////////////////////////////////////////////////
-    static inline auto collect(Cat cat, Collector fn, A &&...args)
+    static inline auto collect(Cat cat, Collector fn)
     {
         return cat(
-            head_type::collect(cat, fn, args...),
-            tail_type::collect(cat, fn, args...)
+            head_type::collect(cat, fn),
+            tail_type::collect(cat, fn)
         );
+    }
+
+    template<typename Transform, typename Fp, typename ...Rp>
+    static inline void each(Transform fn, Fp fp, Rp ...rp)
+    {
+        head_type::each(fn, fp);
+        tail_type::each(fn, rp...);
     }
 };
 

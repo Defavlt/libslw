@@ -29,6 +29,10 @@ struct unexpected_argument_range : public std::runtime_error {
     explicit unexpected_argument_range(shared_state, slw::size_t got, slw::size_t expected);
 };
 
+struct unexpected_argument_type : public std::runtime_error {
+    explicit unexpected_argument_type(shared_state, slw::type_e got, slw::type_e expected);
+};
+
 }/*ns slw*/
 
 #endif/*SLW_EXCEPTION_HPP*/

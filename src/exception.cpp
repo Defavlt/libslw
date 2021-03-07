@@ -34,3 +34,17 @@ slw::unexpected_argument_range::unexpected_argument_range(
              + " arguments, got "
              + std::to_string(got)).c_str());
 }
+
+slw::unexpected_argument_type::unexpected_argument_type(
+        slw::shared_state state,
+        slw::type_e got,
+        slw::type_e expected)
+    : std::runtime_error("expected"
+                         + std::to_string(expected)
+                         + ", got "
+                         + std::to_string(got))
+{ luaL_error(state.get(), (" expected "
+            + std::to_string(expected)
+            + ", got "
+            + std::to_string(got)).c_str());
+}

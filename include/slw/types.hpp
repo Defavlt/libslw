@@ -25,6 +25,7 @@
 #include <string>
 #include <cstdlib>
 #include <stddef.h>
+#include <lua.hpp>
 
 namespace slw {
 
@@ -34,6 +35,7 @@ typedef int int_t;
 typedef std::string string_t;
 typedef std::size_t size_t;
 typedef bool bool_t;
+typedef int reference_t;
 
 struct table_t {
 };
@@ -43,17 +45,16 @@ struct function_t {
 
 enum type_e
 {
-    TNONE = -1, //LUA_TNONE
-    TNIL = 0, //LUA_TNIL
-    TBOOLEAN = 1, //LUA_TBOOLEAN
-    TLIGHTUSERDATA = 2, //LUA_TLIGHTUSERDATA
-    TNUMBER = 3, //LUA_TNUMBER
-    TSTRING = 4, //LUA_TSTRING
-    TTABLE = 5, //LUA_TTABLE
-    TFUNCTION = 6, //LUA_TFUNCTION
-    TUSERDATA = 7, //LUA_TUSERDATA
-    TTHREAD = 8, //LUA_TTHREAD
-    NUMTYPES = TTHREAD + 2
+    TNONE = LUA_TNONE,
+    TNIL = LUA_TNIL, //LUA_TNIL
+    TBOOLEAN = LUA_TBOOLEAN, //LUA_TBOOLEAN
+    TLIGHTUSERDATA = LUA_TLIGHTUSERDATA, //LUA_TLIGHTUSERDATA
+    TNUMBER = LUA_TNUMBER, //LUA_TNUMBER
+    TSTRING = LUA_TSTRING, //LUA_TSTRING
+    TTABLE = LUA_TTABLE, //LUA_TTABLE
+    TFUNCTION = LUA_TFUNCTION, //LUA_TFUNCTION
+    TUSERDATA = LUA_TUSERDATA, //LUA_TUSERDATA
+    TTHREAD = LUA_TTHREAD, //LUA_TTHREAD
 };
 
 namespace internal {
